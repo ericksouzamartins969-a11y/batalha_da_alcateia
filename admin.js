@@ -1,13 +1,12 @@
-/* =========================================================
+/* ============================================================
    BATALHA DA ALCATÉIA
    PAINEL ADMINISTRATIVO
-   Supabase + Cadastro de MCs
-========================================================= */
+   ADMIN.JS — VERSÃO SUPABASE
+   ============================================================ */
 
-
-/* =========================================================
-   CONFIGURAÇÃO
-========================================================= */
+/* =========================
+   CONFIGURAÇÃO SUPABASE
+   ========================= */
 
 const SUPABASE_URL =
   "https://xrvefgqycejiuokdmfio.supabase.co";
@@ -15,1657 +14,1203 @@ const SUPABASE_URL =
 const SUPABASE_PUBLISHABLE_KEY =
   "sb_publishable_iCYF-r1R-VVcVHvlFJkxWg_R-urdYYA";
 
+let sb = null;
 
-/* =========================================================
-   CONEXÃO SUPABASE
-========================================================= */
 
-const supabaseClient =
-  window.supabase.createClient(
+/* =========================
+   VARIÁVEIS
+   ========================= */
+
+let mcs = [];
+let editingId = null;
+let photoData = "";
+let currentUser = null;
+
+
+/* =========================
+   UTILITÁRIOS
+   ========================= */
+
+const $ = (selector) => document.querySelector(selector);
+
+function escapeHtml(value) {
+  if (value === null || value === undefined) return "";
+
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+
+function showMessage(message, type = "normal") {
+  const toast = $("#toast");
+
+  if (!toast) {
+    alert(message);
+    return;
+  }
+
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  if (type === "error") {
+    toast.style.background = "#c40000";
+  } else if (type === "success") {
+    toast.style.background = "#087f35";
+  } else {
+    toast.style.background = "#111";
+  }
+
+  clearTimeout(window.__toastTimer);
+
+  window.__toastTimer = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 3000);
+}
+
+
+function showLoginMessage(message, error = false) {
+  const box = $("#loginMessage");
+
+  if (!box) {
+    alert(message);
+    return;
+  }
+
+  box.innerHTML =
+    `<div class="message" style="
+      color:${error ? "#ff6b6b" : "#7cff9b"};
+      margin-top:10px;
+    ">${escapeHtml(message)}</div>`;
+}
+
+
+/* =========================
+   INICIALIZAÇÃO SUPABASE
+   ========================= */
+
+function initializeSupabase() {
+
+  if (!window.supabase) {
+    showLoginMessage(
+      "Erro: a biblioteca do Supabase não foi carregada. " +
+      "Vamos corrigir o admin.html no próximo passo.",
+      true
+    );
+
+    console.error(
+      "Supabase JS não encontrado. " +
+      "O admin.html precisa carregar @supabase/supabase-js."
+    );
+
+    return false;
+  }
+
+  sb = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY
   );
 
-
-/* =========================================================
-   ELEMENTOS
-========================================================= */
-
-const loginScreen =
-  document.getElementById("loginScreen");
-
-const appContent =
-  document.getElementById("appContent");
-
-const loginForm =
-  document.getElementById("loginForm");
-
-const loginEmail =
-  document.getElementById("loginEmail");
-
-const loginPassword =
-  document.getElementById("loginPassword");
-
-const loginButton =
-  document.getElementById("loginButton");
-
-const loginError =
-  document.getElementById("loginError");
-
-const logoutButton =
-  document.getElementById("logoutButton");
-
-const userEmail =
-  document.getElementById("userEmail");
-
-const sidebar =
-  document.getElementById("sidebar");
-
-const menuButton =
-  document.getElementById("menuButton");
-
-const mcModal =
-  document.getElementById("mcModal");
-
-const mcForm =
-  document.getElementById("mcForm");
-
-const closeModal =
-  document.getElementById("closeModal");
-
-const cancelForm =
-  document.getElementById("cancelForm");
-
-const newMcButton =
-  document.getElementById("newMcButton");
-
-const newMcFromDash =
-  document.getElementById("newMcFromDash");
-
-const quickNewMc =
-  document.getElementById("quickNewMc");
-
-const mcAdminList =
-  document.getElementById("mcAdminList");
-
-const emptyState =
-  document.getElementById("emptyState");
-
-const searchInput =
-  document.getElementById("searchInput");
-
-const sortSelect =
-  document.getElementById("sortSelect");
-
-const mcId =
-  document.getElementById("mcId");
-
-const mcNome =
-  document.getElementById("mcNome");
-
-const mcInstagram =
-  document.getElementById("mcInstagram");
-
-const mcPix =
-  document.getElementById("mcPix");
-
-const mcParticipacoes =
-  document.getElementById("mcParticipacoes");
-
-const mcTitulos =
-  document.getElementById("mcTitulos");
-
-const mcDerrotas =
-  document.getElementById("mcDerrotas");
-
-const mcTwolalas =
-  document.getElementById("mcTwolalas");
-
-const mcPontos =
-  document.getElementById("mcPontos");
-
-const mcBio =
-  document.getElementById("mcBio");
-
-const mcRima =
-  document.getElementById("mcRima");
-
-const mcFoto =
-  document.getElementById("mcFoto");
-
-const photoPreview =
-  document.getElementById("photoPreview");
-
-const previewName =
-  document.getElementById("previewName");
-
-const previewMeta =
-  document.getElementById("previewMeta");
-
-const modalTitle =
-  document.getElementById("modalTitle");
-
-const modalEyebrow =
-  document.getElementById("modalEyebrow");
-
-const toast =
-  document.getElementById("toast");
-
-
-/* =========================================================
-   ESTADO
-========================================================= */
-
-let mcs = [];
-
-let editingMc = null;
-
-let currentPhotoUrl = "";
-
-
-/* =========================================================
-   INICIALIZAÇÃO
-========================================================= */
-
-document.addEventListener(
-  "DOMContentLoaded",
-  iniciar
-);
-
-
-async function iniciar() {
-
-  configurarEventos();
-
-  await verificarSessao();
-
+  return true;
 }
 
 
-/* =========================================================
-   VERIFICAR LOGIN
-========================================================= */
+/* =========================
+   LOGIN
+   ========================= */
 
-async function verificarSessao() {
+async function login() {
+
+  if (!sb) {
+    showLoginMessage(
+      "O sistema ainda não conseguiu conectar ao Supabase.",
+      true
+    );
+    return;
+  }
+
+  const email = $("#loginEmail")?.value.trim();
+  const password = $("#loginPassword")?.value;
+
+  if (!email || !password) {
+    showLoginMessage(
+      "Preencha o e-mail e a senha.",
+      true
+    );
+    return;
+  }
+
+  showLoginMessage("Entrando...");
 
   try {
 
-    const {
-      data,
-      error
-    } =
-      await supabaseClient
-        .auth
-        .getSession();
+    const { data, error } =
+      await sb.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
 
     if (error) {
 
-      console.error(error);
+      console.error("Erro de login:", error);
 
-      mostrarLogin();
-
-      return;
-
-    }
-
-    const session =
-      data.session;
-
-    if (!session) {
-
-      mostrarLogin();
-
-      return;
-
-    }
-
-    const autorizado =
-      await verificarAdministrador(
-        session.user.id
-      );
-
-    if (!autorizado) {
-
-      await supabaseClient
-        .auth
-        .signOut();
-
-      mostrarLogin();
-
-      mostrarErroLogin(
-        "Este usuário não possui acesso ao painel."
+      showLoginMessage(
+        "Não foi possível entrar: " + error.message,
+        true
       );
 
       return;
-
     }
 
-    mostrarAplicacao(
-      session.user
+    if (!data || !data.user) {
+
+      showLoginMessage(
+        "O Supabase não retornou o usuário.",
+        true
+      );
+
+      return;
+    }
+
+    currentUser = data.user;
+
+    /*
+      Verifica se o usuário está cadastrado
+      na tabela public.admin_users.
+    */
+
+    const { data: adminUser, error: adminError } =
+      await sb
+        .from("admin_users")
+        .select("user_id")
+        .eq("user_id", currentUser.id)
+        .maybeSingle();
+
+    if (adminError) {
+
+      console.error(
+        "Erro ao verificar administrador:",
+        adminError
+      );
+
+      await sb.auth.signOut();
+
+      showLoginMessage(
+        "Login realizado, mas não foi possível verificar " +
+        "a autorização do administrador: " +
+        adminError.message,
+        true
+      );
+
+      return;
+    }
+
+    if (!adminUser) {
+
+      await sb.auth.signOut();
+
+      showLoginMessage(
+        "Este usuário não está autorizado como administrador.",
+        true
+      );
+
+      return;
+    }
+
+    /*
+      LOGIN APROVADO
+    */
+
+    showLoginMessage(
+      "Login realizado com sucesso!"
     );
 
-  } catch (erro) {
+    $("#loginBox")?.classList.add("hidden");
+    $("#adminPanel")?.classList.remove("hidden");
 
-    console.error(erro);
+    await loadAllData();
 
-    mostrarLogin();
+    showMessage(
+      "Bem-vindo ao painel da Batalha da Alcatéia!",
+      "success"
+    );
 
+  } catch (error) {
+
+    console.error("Erro inesperado no login:", error);
+
+    showLoginMessage(
+      "Erro inesperado: " + error.message,
+      true
+    );
   }
+}
+
+
+/* =========================
+   LOGOUT
+   ========================= */
+
+async function logout() {
+
+  try {
+
+    if (sb) {
+      await sb.auth.signOut();
+    }
+
+  } catch (error) {
+    console.error(error);
+  }
+
+  currentUser = null;
+  mcs = [];
+
+  $("#loginBox")?.classList.remove("hidden");
+  $("#adminPanel")?.classList.add("hidden");
+
+  showLoginMessage("Você saiu do painel.");
 
 }
 
 
-/* =========================================================
-   VERIFICAR ADMINISTRADOR
-========================================================= */
+/* =========================
+   VERIFICAR SESSÃO
+   ========================= */
 
-async function verificarAdministrador(
-  userId
-) {
+async function checkSession() {
+
+  if (!sb) return;
 
   try {
 
     const {
       data,
       error
-    } =
-      await supabaseClient
-        .from("admin_users")
-        .select("user_id")
-        .eq("user_id", userId)
-        .maybeSingle();
+    } = await sb.auth.getSession();
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    if (!data.session) {
+      return;
+    }
+
+    currentUser = data.session.user;
+
+    /*
+      Verifica administrador.
+    */
+
+    const {
+      data: adminUser,
+      error: adminError
+    } = await sb
+      .from("admin_users")
+      .select("user_id")
+      .eq("user_id", currentUser.id)
+      .maybeSingle();
+
+    if (adminError || !adminUser) {
+
+      await sb.auth.signOut();
+
+      return;
+    }
+
+    $("#loginBox")?.classList.add("hidden");
+    $("#adminPanel")?.classList.remove("hidden");
+
+    await loadAllData();
+
+  } catch (error) {
+
+    console.error(
+      "Erro ao verificar sessão:",
+      error
+    );
+  }
+}
+
+
+/* =========================
+   CARREGAR MCs
+   ========================= */
+
+async function loadMcs() {
+
+  if (!sb) return;
+
+  try {
+
+    const {
+      data,
+      error
+    } = await sb
+      .from("mcs")
+      .select("*")
+      .order("points", {
+        ascending: false
+      });
 
     if (error) {
 
       console.error(
-        "Erro ao verificar administrador:",
+        "Erro ao carregar MCs:",
         error
       );
 
-      return false;
+      /*
+        Algumas versões do banco podem usar
+        pontos em vez de points.
+      */
 
-    }
-
-    return !!data;
-
-  } catch (erro) {
-
-    console.error(erro);
-
-    return false;
-
-  }
-
-}
-
-
-/* =========================================================
-   MOSTRAR LOGIN
-========================================================= */
-
-function mostrarLogin() {
-
-  loginScreen.style.display =
-    "flex";
-
-  appContent.style.display =
-    "none";
-
-}
-
-
-/* =========================================================
-   MOSTRAR APLICAÇÃO
-========================================================= */
-
-async function mostrarAplicacao(
-  user
-) {
-
-  loginScreen.style.display =
-    "none";
-
-  appContent.style.display =
-    "block";
-
-  if (userEmail) {
-
-    userEmail.textContent =
-      user.email || "";
-
-  }
-
-  await carregarMCs();
-
-}
-
-
-/* =========================================================
-   LOGIN
-========================================================= */
-
-loginForm.addEventListener(
-  "submit",
-  async function(event) {
-
-    event.preventDefault();
-
-    limparErroLogin();
-
-    const email =
-      loginEmail.value.trim();
-
-    const password =
-      loginPassword.value;
-
-    if (!email || !password) {
-
-      mostrarErroLogin(
-        "Digite seu e-mail e sua senha."
-      );
-
-      return;
-
-    }
-
-    loginButton.disabled =
-      true;
-
-    loginButton.textContent =
-      "ENTRANDO...";
-
-    try {
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
-          .auth
-          .signInWithPassword({
-            email,
-            password
+      const fallback =
+        await sb
+          .from("mcs")
+          .select("*")
+          .order("pontos", {
+            ascending: false
           });
 
-      if (error) {
+      if (fallback.error) {
 
-        throw error;
-
-      }
-
-      if (!data.user) {
-
-        throw new Error(
-          "Não foi possível identificar o usuário."
+        showMessage(
+          "Erro ao carregar MCs: " +
+          error.message,
+          "error"
         );
 
+        return;
       }
 
-      const autorizado =
-        await verificarAdministrador(
-          data.user.id
-        );
+      mcs = fallback.data || [];
 
-      if (!autorizado) {
+    } else {
 
-        await supabaseClient
-          .auth
-          .signOut();
-
-        throw new Error(
-          "Este usuário não está autorizado como administrador."
-        );
-
-      }
-
-      mostrarAplicacao(
-        data.user
-      );
-
-    } catch (erro) {
-
-      console.error(erro);
-
-      mostrarErroLogin(
-        traduzirErroLogin(
-          erro.message
-        )
-      );
-
-    } finally {
-
-      loginButton.disabled =
-        false;
-
-      loginButton.textContent =
-        "ENTRAR NO PAINEL";
+      mcs = data || [];
 
     }
 
+    renderMcs();
+    renderDashboard();
+    renderFullRanking();
+
+  } catch (error) {
+
+    console.error(error);
+
+    showMessage(
+      "Erro ao carregar MCs: " +
+      error.message,
+      "error"
+    );
   }
-);
-
-
-/* =========================================================
-   TRADUZIR ERROS
-========================================================= */
-
-function traduzirErroLogin(
-  mensagem
-) {
-
-  const texto =
-    String(mensagem || "");
-
-  if (
-    texto.toLowerCase()
-      .includes("invalid login credentials")
-  ) {
-
-    return "E-mail ou senha incorretos.";
-
-  }
-
-  if (
-    texto.toLowerCase()
-      .includes("email not confirmed")
-  ) {
-
-    return "Seu e-mail ainda não foi confirmado.";
-
-  }
-
-  return texto ||
-    "Não foi possível entrar.";
-
 }
 
 
-/* =========================================================
-   LOGOUT
-========================================================= */
+/* =========================
+   NORMALIZAR MC
+   ========================= */
 
-logoutButton.addEventListener(
-  "click",
-  async function() {
+function normalizeMc(mc) {
 
-    await supabaseClient
-      .auth
-      .signOut();
+  return {
 
-    mcs = [];
+    id: mc.id,
 
-    appContent.style.display =
-      "none";
+    nome:
+      mc.nome ??
+      mc.name ??
+      "",
 
-    loginScreen.style.display =
-      "flex";
+    instagram:
+      mc.instagram ??
+      "",
 
-    loginPassword.value = "";
+    pix:
+      mc.pix ??
+      mc.pix_key ??
+      "",
 
-    loginEmail.focus();
+    participacoes:
+      Number(
+        mc.participacoes ??
+        mc.participations ??
+        0
+      ),
 
-  }
-);
+    titulos:
+      Number(
+        mc.titulos ??
+        mc.titles ??
+        0
+      ),
 
+    derrotas:
+      Number(
+        mc.derrotas ??
+        mc.losses ??
+        0
+      ),
 
-/* =========================================================
-   ERROS LOGIN
-========================================================= */
+    twolalas:
+      Number(
+        mc.twolalas ??
+        mc.two_lalas ??
+        0
+      ),
 
-function mostrarErroLogin(
-  mensagem
-) {
+    pontos:
+      Number(
+        mc.pontos ??
+        mc.points ??
+        0
+      ),
 
-  loginError.textContent =
-    mensagem;
+    bio:
+      mc.bio ??
+      mc.biography ??
+      "",
 
-}
+    melhorRima:
+      mc.melhorRima ??
+      mc.best_rhyme ??
+      "",
 
-function limparErroLogin() {
+    foto:
+      mc.foto ??
+      mc.photo_url ??
+      ""
 
-  loginError.textContent =
-    "";
-
-}
-
-
-/* =========================================================
-   MENU
-========================================================= */
-
-if (menuButton) {
-
-  menuButton.addEventListener(
-    "click",
-    function() {
-
-      sidebar.classList.toggle(
-        "open"
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   NAVEGAÇÃO
-========================================================= */
-
-document
-  .querySelectorAll(".side-link")
-  .forEach(
-    button => {
-
-      button.addEventListener(
-        "click",
-        function() {
-
-          abrirView(
-            button.dataset.view
-          );
-
-          if (sidebar) {
-
-            sidebar.classList.remove(
-              "open"
-            );
-
-          }
-
-        }
-      );
-
-    }
-  );
-
-
-document
-  .querySelectorAll("[data-view-link]")
-  .forEach(
-    button => {
-
-      button.addEventListener(
-        "click",
-        function() {
-
-          abrirView(
-            button.dataset.viewLink
-          );
-
-        }
-      );
-
-    }
-  );
-
-
-function abrirView(
-  nome
-) {
-
-  document
-    .querySelectorAll(".view")
-    .forEach(
-      view => {
-
-        view.classList.remove(
-          "active"
-        );
-
-      }
-    );
-
-  document
-    .querySelectorAll(".side-link")
-    .forEach(
-      button => {
-
-        button.classList.remove(
-          "active"
-        );
-
-      }
-    );
-
-
-  const view =
-    document.getElementById(
-      nome + "View"
-    );
-
-  if (view) {
-
-    view.classList.add(
-      "active"
-    );
-
-  }
-
-
-  const menu =
-    document.querySelector(
-      `.side-link[data-view="${nome}"]`
-    );
-
-  if (menu) {
-
-    menu.classList.add(
-      "active"
-    );
-
-  }
-
-
-  if (nome === "ranking") {
-
-    renderizarRanking();
-
-  }
-
+  };
 }
 
 
-/* =========================================================
-   CARREGAR MCs DO SUPABASE
-========================================================= */
+/* =========================
+   APROVEITAMENTO
+   ========================= */
 
-async function carregarMCs() {
+function calculatePerformance(mc) {
 
-  mcAdminList.innerHTML =
-    `<div class="empty">
-       <div>⏳</div>
-       <h2>CARREGANDO MCs...</h2>
-     </div>`;
+  const participacoes =
+    Number(mc.participacoes || 0);
 
-  try {
+  const derrotas =
+    Number(mc.derrotas || 0);
 
-    const {
-      data,
-      error
-    } =
-      await supabaseClient
-        .from("mcs")
-        .select("*")
-        .order(
-          "pontos",
-          {
-            ascending: false
-          }
-        );
+  if (!participacoes) return 0;
 
-    if (error) {
+  const resultado =
+    ((participacoes - derrotas) /
+      participacoes) *
+    100;
 
-      throw error;
-
-    }
-
-    mcs =
-      Array.isArray(data)
-        ? data
-        : [];
-
-    renderizarMCs();
-
-    atualizarDashboard();
-
-    renderizarRanking();
-
-  } catch (erro) {
-
-    console.error(
-      "Erro ao carregar MCs:",
-      erro
-    );
-
-    mcAdminList.innerHTML =
-      `<div class="empty">
-         <div>⚠️</div>
-         <h2>ERRO AO CARREGAR</h2>
-         <p>${escaparHtml(
-           erro.message
-         )}</p>
-       </div>`;
-
-  }
-
-}
-
-
-/* =========================================================
-   RENDERIZAR MCs
-========================================================= */
-
-function renderizarMCs() {
-
-  let lista =
-    [...mcs];
-
-  const busca =
-    String(
-      searchInput.value || ""
+  return Math.max(
+    0,
+    Math.min(
+      100,
+      Math.round(resultado)
     )
+  );
+}
+
+
+/* =========================
+   RENDER MCs
+   ========================= */
+
+function renderMcs() {
+
+  const container = $("#mcAdminList");
+
+  if (!container) return;
+
+  const search =
+    ($("#searchInput")?.value || "")
       .trim()
       .toLowerCase();
 
+  const sort =
+    $("#sortSelect")?.value ||
+    "pontos";
 
-  if (busca) {
+  let list =
+    mcs
+      .map(normalizeMc)
+      .filter(mc => {
 
-    lista =
-      lista.filter(
-        mc => {
+        const text =
+          (
+            mc.nome +
+            " " +
+            mc.instagram
+          ).toLowerCase();
 
-          const nome =
-            String(
-              mc.nome || ""
-            )
-              .toLowerCase();
+        return text.includes(search);
 
-          const instagram =
-            String(
-              mc.instagram || ""
-            )
-              .toLowerCase();
+      });
 
-          return (
-            nome.includes(busca) ||
-            instagram.includes(busca)
-          );
 
-        }
+  list.sort((a, b) => {
+
+    if (sort === "nome") {
+      return a.nome.localeCompare(
+        b.nome,
+        "pt-BR"
       );
-
-  }
-
-
-  lista =
-    ordenarMCs(
-      lista,
-      sortSelect.value
-    );
-
-
-  if (!lista.length) {
-
-    mcAdminList.innerHTML =
-      "";
-
-    emptyState.hidden =
-      false;
-
-    return;
-
-  }
-
-  emptyState.hidden =
-    true;
-
-
-  mcAdminList.innerHTML =
-    lista
-      .map(
-        mc => criarCardMC(mc)
-      )
-      .join("");
-
-
-  adicionarEventosCards();
-
-}
-
-
-/* =========================================================
-   ORDENAR MCs
-========================================================= */
-
-function ordenarMCs(
-  lista,
-  tipo
-) {
-
-  return lista.sort(
-    (a, b) => {
-
-      if (tipo === "nome") {
-
-        return String(
-          a.nome || ""
-        ).localeCompare(
-          String(
-            b.nome || ""
-          ),
-          "pt-BR"
-        );
-
-      }
-
-      if (tipo === "titulos") {
-
-        return Number(
-          b.titulos || 0
-        ) -
-        Number(
-          a.titulos || 0
-        );
-
-      }
-
-      if (tipo === "twolalas") {
-
-        return Number(
-          b.twolalas || 0
-        ) -
-        Number(
-          a.twolalas || 0
-        );
-
-      }
-
-      if (
-        tipo ===
-        "participacoes"
-      ) {
-
-        return Number(
-          b.participacoes || 0
-        ) -
-        Number(
-          a.participacoes || 0
-        );
-
-      }
-
-      return Number(
-        b.pontos || 0
-      ) -
-      Number(
-        a.pontos || 0
-      );
-
     }
-  );
 
-}
-
-
-/* =========================================================
-   CARD DO MC
-========================================================= */
-
-function criarCardMC(
-  mc
-) {
-
-  const foto =
-    mc.foto_url ||
-    "";
-
-  const fotoHtml =
-    foto
-      ? `<img
-           src="${escaparAtributo(foto)}"
-           alt="${escaparAtributo(
-             mc.nome || "MC"
-           )}"
-           style="
-             width:100%;
-             height:100%;
-             object-fit:cover;
-           "
-         >`
-      : "FOTO";
-
-
-  const instagram =
-    mc.instagram
-      ? escaparHtml(
-          mc.instagram
-        )
-      : "Sem Instagram";
-
-
-  return `
-
-    <article
-      class="mc-row"
-      data-id="${escaparAtributo(
-        mc.id
-      )}">
-
-      <div class="mc-avatar">
-
-        ${fotoHtml}
-
-      </div>
-
-
-      <div>
-
-        <h3>
-          ${escaparHtml(
-            mc.nome || "Sem nome"
-          )}
-        </h3>
-
-        <p>
-          ${instagram}
-        </p>
-
-
-        <div class="mc-stats">
-
-          <span>
-            ${numero(mc.pontos)}
-            PTS
-          </span>
-
-          <span>
-            ${numero(mc.participacoes)}
-            PART.
-          </span>
-
-          <span>
-            ${numero(mc.titulos)}
-            TÍTULOS
-          </span>
-
-          <span>
-            ${numero(mc.derrotas)}
-            DERROTAS
-          </span>
-
-          <span>
-            ${numero(mc.twolalas)}
-            TWO LALAS
-          </span>
-
-        </div>
-
-      </div>
-
-
-      <div class="row-actions">
-
-        <button
-          class="icon-btn edit-mc"
-          data-id="${escaparAtributo(
-            mc.id
-          )}">
-
-          EDITAR
-
-        </button>
-
-
-        <button
-          class="icon-btn delete delete-mc"
-          data-id="${escaparAtributo(
-            mc.id
-          )}">
-
-          EXCLUIR
-
-        </button>
-
-      </div>
-
-    </article>
-
-  `;
-
-}
-
-
-/* =========================================================
-   EVENTOS DOS CARDS
-========================================================= */
-
-function adicionarEventosCards() {
-
-  document
-    .querySelectorAll(".edit-mc")
-    .forEach(
-      button => {
-
-        button.addEventListener(
-          "click",
-          function() {
-
-            abrirEdicaoMC(
-              button.dataset.id
-            );
-
-          }
-        );
-
-      }
+    return Number(
+      b[sort] || 0
+    ) -
+    Number(
+      a[sort] || 0
     );
+
+  });
+
+
+  const empty =
+    $("#emptyState");
+
+  if (empty) {
+    empty.hidden =
+      list.length !== 0;
+  }
+
+
+  container.innerHTML =
+    list.map(mc => {
+
+      const performance =
+        calculatePerformance(mc);
+
+      return `
+
+        <article class="mc-row">
+
+          <div class="mc-avatar">
+
+            ${
+              mc.foto
+
+              ? `
+                <img
+                  src="${escapeHtml(mc.foto)}"
+                  alt=""
+                  style="
+                    width:100%;
+                    height:100%;
+                    object-fit:cover;
+                  "
+                >
+              `
+
+              : `
+                FOTO<br>MC
+              `
+            }
+
+          </div>
+
+
+          <div>
+
+            <h3>
+              ${escapeHtml(mc.nome)}
+            </h3>
+
+            <p>
+              ${
+                escapeHtml(
+                  mc.instagram ||
+                  "Instagram não informado"
+                )
+              }
+              •
+              ${performance}%
+              aproveitamento
+            </p>
+
+
+            <div class="mc-stats">
+
+              <span>
+                ${mc.pontos} PONTOS
+              </span>
+
+              <span>
+                ${mc.participacoes}
+                PARTICIPAÇÕES
+              </span>
+
+              <span>
+                ${mc.titulos}
+                TÍTULOS
+              </span>
+
+              <span>
+                ${mc.derrotas}
+                DERROTAS
+              </span>
+
+              <span>
+                ${mc.twolalas}
+                TWO LALAS
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="row-actions">
+
+            <button
+              class="icon-btn"
+              data-edit="${mc.id}"
+            >
+              ✎ EDITAR
+            </button>
+
+            <button
+              class="icon-btn delete"
+              data-delete="${mc.id}"
+            >
+              🗑
+            </button>
+
+          </div>
+
+        </article>
+
+      `;
+
+    }).join("");
 
 
   document
-    .querySelectorAll(".delete-mc")
-    .forEach(
-      button => {
+    .querySelectorAll("[data-edit]")
+    .forEach(button => {
 
-        button.addEventListener(
-          "click",
-          async function() {
+      button.onclick = () => {
 
-            await excluirMC(
-              button.dataset.id
-            );
-
-          }
+        openEditor(
+          button.dataset.edit
         );
 
-      }
-    );
+      };
+
+    });
+
+
+  document
+    .querySelectorAll("[data-delete]")
+    .forEach(button => {
+
+      button.onclick = () => {
+
+        deleteMc(
+          button.dataset.delete
+        );
+
+      };
+
+    });
 
 }
 
 
-/* =========================================================
-   NOVO MC
-========================================================= */
+/* =========================
+   DASHBOARD
+   ========================= */
 
-newMcButton.addEventListener(
-  "click",
-  abrirNovoMC
-);
+function renderDashboard() {
 
-newMcFromDash.addEventListener(
-  "click",
-  abrirNovoMC
-);
-
-quickNewMc.addEventListener(
-  "click",
-  abrirNovoMC
-);
+  const normalized =
+    mcs.map(normalizeMc);
 
 
-function abrirNovoMC() {
-
-  editingMc =
-    null;
-
-  currentPhotoUrl =
-    "";
-
-  mcForm.reset();
-
-  mcId.value =
-    "";
-
-  mcParticipacoes.value =
-    0;
-
-  mcTitulos.value =
-    0;
-
-  mcDerrotas.value =
-    0;
-
-  mcTwolalas.value =
-    0;
-
-  mcPontos.value =
-    0;
-
-  modalTitle.textContent =
-    "NOVO MC";
-
-  modalEyebrow.textContent =
-    "CADASTRO";
-
-  photoPreview.innerHTML =
-    "FOTO<br>DO MC";
-
-  atualizarPreview();
-
-  abrirModal();
-
-}
-
-
-/* =========================================================
-   EDITAR MC
-========================================================= */
-
-function abrirEdicaoMC(
-  id
-) {
-
-  const mc =
-    mcs.find(
-      item =>
-        String(item.id) ===
-        String(id)
+  const points =
+    normalized.reduce(
+      (total, mc) =>
+        total +
+        Number(mc.pontos || 0),
+      0
     );
 
-  if (!mc) {
 
-    mostrarToast(
-      "MC não encontrado."
+  const titles =
+    normalized.reduce(
+      (total, mc) =>
+        total +
+        Number(mc.titulos || 0),
+      0
     );
 
-    return;
+
+  const twolalas =
+    normalized.reduce(
+      (total, mc) =>
+        total +
+        Number(mc.twolalas || 0),
+      0
+    );
+
+
+  if ($("#metricMcs"))
+    $("#metricMcs").textContent =
+      normalized.length;
+
+
+  if ($("#metricPoints"))
+    $("#metricPoints").textContent =
+      points;
+
+
+  if ($("#metricTitles"))
+    $("#metricTitles").textContent =
+      titles;
+
+
+  if ($("#metricTwolalas"))
+    $("#metricTwolalas").textContent =
+      twolalas;
+
+
+  const ranking =
+    [...normalized]
+      .sort(
+        (a, b) =>
+          b.pontos - a.pontos
+      )
+      .slice(0, 8);
+
+
+  if ($("#dashRanking")) {
+
+    $("#dashRanking").innerHTML =
+      ranking.length
+
+        ? ranking.map(
+            (mc, index) => `
+
+              <div class="mini-rank">
+
+                <b>
+                  ${index + 1}º
+                </b>
+
+                <strong>
+                  ${escapeHtml(mc.nome)}
+                </strong>
+
+                <span>
+                  ${mc.pontos} pts
+                </span>
+
+              </div>
+
+            `
+          ).join("")
+
+        : "<p>Nenhum MC cadastrado.</p>";
 
   }
 
-  editingMc =
-    mc;
-
-  currentPhotoUrl =
-    mc.foto_url || "";
+}
 
 
-  mcId.value =
-    mc.id || "";
+/* =========================
+   RANKING COMPLETO
+   ========================= */
 
-  mcNome.value =
-    mc.nome || "";
+function renderFullRanking() {
 
-  mcInstagram.value =
-    mc.instagram || "";
+  const container =
+    $("#fullRanking");
 
-  mcPix.value =
-    mc.pix || "";
-
-  mcParticipacoes.value =
-    numero(mc.participacoes);
-
-  mcTitulos.value =
-    numero(mc.titulos);
-
-  mcDerrotas.value =
-    numero(mc.derrotas);
-
-  mcTwolalas.value =
-    numero(mc.twolalas);
-
-  mcPontos.value =
-    numero(mc.pontos);
-
-  mcBio.value =
-    mc.bio || "";
-
-  mcRima.value =
-    mc.melhor_rima || "";
-
-  mcFoto.value =
-    "";
+  if (!container) return;
 
 
-  modalTitle.textContent =
-    "EDITAR MC";
+  const sorted =
+    [...mcs]
+      .map(normalizeMc)
+      .sort(
+        (a, b) =>
+          b.pontos - a.pontos
+      );
 
-  modalEyebrow.textContent =
-    "EDIÇÃO";
+
+  if (!sorted.length) {
+
+    container.innerHTML =
+      "<p>Nenhum MC cadastrado.</p>";
+
+    return;
+  }
 
 
-  if (currentPhotoUrl) {
+  container.innerHTML =
+    sorted.map(
+      (mc, index) => {
 
-    photoPreview.innerHTML =
-      `<img
-        src="${escaparAtributo(
-          currentPhotoUrl
-        )}"
-        alt="Foto"
-        style="
-          width:100%;
-          height:100%;
-          object-fit:cover;
-        "
-      >`;
+        return `
 
-  } else {
+          <div class="full-rank">
 
-    photoPreview.innerHTML =
+            <div class="position">
+              ${index + 1}º
+            </div>
+
+            <div>
+
+              <strong>
+                ${escapeHtml(mc.nome)}
+              </strong>
+
+              <small>
+                ${
+                  index < 3
+                    ? "PÓDIO"
+                    : index < 8
+                      ? "CLASSIFICADO"
+                      : "RANKING"
+                }
+              </small>
+
+            </div>
+
+            <div>
+
+              <strong>
+                ${mc.pontos}
+              </strong>
+
+              <small>
+                PONTOS
+              </small>
+
+            </div>
+
+            <div>
+
+              <strong>
+                ${mc.titulos}
+              </strong>
+
+              <small>
+                TÍTULOS
+              </small>
+
+            </div>
+
+            <div>
+
+              <strong>
+                ${mc.twolalas}
+              </strong>
+
+              <small>
+                TWO LALAS
+              </small>
+
+            </div>
+
+            <div>
+
+              <strong>
+                ${mc.participacoes}
+              </strong>
+
+              <small>
+                PARTICIPAÇÕES
+              </small>
+
+            </div>
+
+          </div>
+
+        `;
+
+      }
+    ).join("");
+
+}
+
+
+/* =========================
+   EDITAR MC
+   ========================= */
+
+function resetForm() {
+
+  $("#mcForm")?.reset();
+
+  editingId = null;
+  photoData = "";
+
+  if ($("#mcId"))
+    $("#mcId").value = "";
+
+  if ($("#modalTitle"))
+    $("#modalTitle").textContent =
+      "NOVO MC";
+
+  if ($("#modalEyebrow"))
+    $("#modalEyebrow").textContent =
+      "CADASTRO";
+
+  if ($("#photoPreview"))
+    $("#photoPreview").innerHTML =
       "FOTO<br>DO MC";
 
-  }
+  if ($("#previewName"))
+    $("#previewName").textContent =
+      "NOME DO MC";
 
-
-  atualizarPreview();
-
-  abrirModal();
-
-}
-
-
-/* =========================================================
-   ABRIR / FECHAR MODAL
-========================================================= */
-
-function abrirModal() {
-
-  mcModal.classList.add(
-    "open"
-  );
-
-  mcModal.setAttribute(
-    "aria-hidden",
-    "false"
-  );
-
-  setTimeout(
-    () => mcNome.focus(),
-    100
-  );
+  if ($("#previewMeta"))
+    $("#previewMeta").textContent =
+      "0 pontos • 0 títulos • 0 Twolalas";
 
 }
 
 
-function fecharModal() {
+function openEditor(id = null) {
 
-  mcModal.classList.remove(
-    "open"
-  );
+  resetForm();
 
-  mcModal.setAttribute(
-    "aria-hidden",
-    "true"
-  );
-
-  editingMc =
-    null;
-
-}
+  editingId = id;
 
 
-closeModal.addEventListener(
-  "click",
-  fecharModal
-);
+  if (id) {
 
-cancelForm.addEventListener(
-  "click",
-  fecharModal
-);
-
-
-mcModal.addEventListener(
-  "click",
-  function(event) {
-
-    if (
-      event.target ===
-      mcModal
-    ) {
-
-      fecharModal();
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   PREVIEW
-========================================================= */
-
-[
-  mcNome,
-  mcPontos,
-  mcTitulos,
-  mcTwolalas
-]
-  .forEach(
-    campo => {
-
-      campo.addEventListener(
-        "input",
-        atualizarPreview
+    const original =
+      mcs.find(
+        mc => String(mc.id) === String(id)
       );
 
-    }
-  );
+    if (!original) {
 
-
-function atualizarPreview() {
-
-  previewName.textContent =
-    mcNome.value.trim() ||
-    "NOME DO MC";
-
-
-  previewMeta.textContent =
-    `${numero(mcPontos.value)} pontos • ` +
-    `${numero(mcTitulos.value)} títulos • ` +
-    `${numero(mcTwolalas.value)} Twolalas`;
-
-}
-
-
-/* =========================================================
-   PREVIEW FOTO
-========================================================= */
-
-mcFoto.addEventListener(
-  "change",
-  function() {
-
-    const arquivo =
-      mcFoto.files[0];
-
-    if (!arquivo) {
-
-      return;
-
-    }
-
-
-    if (
-      arquivo.size >
-      2 * 1024 * 1024
-    ) {
-
-      mostrarToast(
-        "A foto deve ter no máximo 2 MB."
+      showMessage(
+        "MC não encontrado.",
+        "error"
       );
 
-      mcFoto.value =
-        "";
-
       return;
-
     }
 
 
-    const reader =
-      new FileReader();
+    const mc =
+      normalizeMc(original);
 
 
-    reader.onload =
-      function(event) {
+    $("#modalTitle").textContent =
+      "EDITAR MC";
 
-        photoPreview.innerHTML =
-          `<img
-            src="${event.target.result}"
-            alt="Prévia"
+    $("#modalEyebrow").textContent =
+      "EDIÇÃO";
+
+
+    $("#mcId").value =
+      mc.id || "";
+
+    $("#mcNome").value =
+      mc.nome || "";
+
+    $("#mcInstagram").value =
+      mc.instagram || "";
+
+    $("#mcPix").value =
+      mc.pix || "";
+
+    $("#mcParticipacoes").value =
+      mc.participacoes || 0;
+
+    $("#mcTitulos").value =
+      mc.titulos || 0;
+
+    $("#mcDerrotas").value =
+      mc.derrotas || 0;
+
+    $("#mcTwolalas").value =
+      mc.twolalas || 0;
+
+    $("#mcPontos").value =
+      mc.pontos || 0;
+
+    $("#mcBio").value =
+      mc.bio || "";
+
+    $("#mcRima").value =
+      mc.melhorRima || "";
+
+    photoData =
+      mc.foto || "";
+
+
+    if (photoData) {
+
+      $("#photoPreview").innerHTML =
+        `
+          <img
+            src="${escapeHtml(photoData)}"
+            alt=""
             style="
               width:100%;
               height:100%;
               object-fit:cover;
             "
-          >`;
-
-      };
-
-
-    reader.readAsDataURL(
-      arquivo
-    );
-
-  }
-);
-
-
-/* =========================================================
-   SALVAR MC
-========================================================= */
-
-mcForm.addEventListener(
-  "submit",
-  async function(event) {
-
-    event.preventDefault();
-
-
-    const nome =
-      mcNome.value.trim();
-
-
-    if (!nome) {
-
-      mostrarToast(
-        "Digite o nome do MC."
-      );
-
-      return;
-
-    }
-
-
-    const dados = {
-
-      nome,
-
-      instagram:
-        mcInstagram.value.trim(),
-
-      pix:
-        mcPix.value.trim(),
-
-      participacoes:
-        inteiro(
-          mcParticipacoes.value
-        ),
-
-      titulos:
-        inteiro(
-          mcTitulos.value
-        ),
-
-      derrotas:
-        inteiro(
-          mcDerrotas.value
-        ),
-
-      twolalas:
-        inteiro(
-          mcTwolalas.value
-        ),
-
-      pontos:
-        inteiro(
-          mcPontos.value
-        ),
-
-      bio:
-        mcBio.value.trim(),
-
-      melhor_rima:
-        mcRima.value.trim()
-
-    };
-
-
-    const submitButton =
-      mcForm.querySelector(
-        'button[type="submit"]'
-      );
-
-
-    submitButton.disabled =
-      true;
-
-    submitButton.textContent =
-      "SALVANDO...";
-
-
-    try {
-
-      /* -----------------------------------------------
-         FOTO
-      ------------------------------------------------ */
-
-      if (
-        mcFoto.files &&
-        mcFoto.files[0]
-      ) {
-
-        currentPhotoUrl =
-          await enviarFoto(
-            mcFoto.files[0],
-            nome
-          );
-
-        dados.foto_url =
-          currentPhotoUrl;
-
-      } else if (
-        currentPhotoUrl
-      ) {
-
-        dados.foto_url =
-          currentPhotoUrl;
-
-      }
-
-
-      /* -----------------------------------------------
-         ATUALIZAR
-      ------------------------------------------------ */
-
-      if (editingMc) {
-
-        const {
-          error
-        } =
-          await supabaseClient
-            .from("mcs")
-            .update(dados)
-            .eq(
-              "id",
-              editingMc.id
-            );
-
-        if (error) {
-
-          throw error;
-
-        }
-
-
-        mostrarToast(
-          "MC atualizado com sucesso!"
-        );
-
-      }
-
-
-      /* -----------------------------------------------
-         CRIAR
-      ------------------------------------------------ */
-
-      else {
-
-        const {
-          error
-        } =
-          await supabaseClient
-            .from("mcs")
-            .insert(
-              dados
-            );
-
-        if (error) {
-
-          throw error;
-
-        }
-
-
-        mostrarToast(
-          "MC cadastrado com sucesso!"
-        );
-
-      }
-
-
-      fecharModal();
-
-      await carregarMCs();
-
-
-    } catch (erro) {
-
-      console.error(
-        "Erro ao salvar MC:",
-        erro
-      );
-
-
-      mostrarToast(
-        "Erro: " +
-        (erro.message ||
-          "não foi possível salvar.")
-      );
-
-
-    } finally {
-
-      submitButton.disabled =
-        false;
-
-      submitButton.textContent =
-        "SALVAR MC";
+          >
+        `;
 
     }
 
   }
-);
 
 
-/* =========================================================
-   ENVIAR FOTO PARA STORAGE
-========================================================= */
+  updatePreview();
 
-async function enviarFoto(
-  arquivo,
-  nome
-) {
+  $("#mcModal")?.classList.add("open");
 
-  const extensao =
-    obterExtensao(
-      arquivo.name
+  $("#mcModal")?.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+}
+
+
+/* =========================
+   PREVIEW
+   ========================= */
+
+function updatePreview() {
+
+  if ($("#previewName")) {
+
+    $("#previewName").textContent =
+      $("#mcNome")?.value ||
+      "NOME DO MC";
+
+  }
+
+
+  if ($("#previewMeta")) {
+
+    $("#previewMeta").textContent =
+
+      `${$("#mcPontos")?.value || 0} pontos • ` +
+
+      `${$("#mcTitulos")?.value || 0} títulos • ` +
+
+      `${$("#mcTwolalas")?.value || 0} Twolalas`;
+
+  }
+
+}
+
+
+/* =========================
+   UPLOAD DA FOTO
+   ========================= */
+
+async function uploadPhoto(file) {
+
+  if (!file) {
+    return photoData || null;
+  }
+
+
+  if (!sb) {
+    throw new Error(
+      "Supabase não inicializado."
     );
+  }
 
 
-  const nomeSeguro =
-    normalizarNomeArquivo(
-      nome
-    );
-
-
-  const nomeArquivo =
-    `${nomeSeguro}-${Date.now()}.${extensao}`;
-
-
-  const caminho =
-    `mcs/${nomeArquivo}`;
-
-
-  const {
-    error
-  } =
-    await supabaseClient
-      .storage
-      .from("mcs")
-      .upload(
-        caminho,
-        arquivo,
-        {
-          cacheControl: "3600",
-          upsert: false,
-          contentType:
-            arquivo.type
-        }
-      );
-
-
-  if (error) {
+  if (
+    file.size >
+    5 * 1024 * 1024
+  ) {
 
     throw new Error(
-      "Não foi possível enviar a foto. " +
-      "Verifique se o Storage 'mcs' foi criado no Supabase. " +
-      error.message
+      "A foto deve ter no máximo 5 MB."
     );
+
+  }
+
+
+  const extension =
+    file.name
+      .split(".")
+      .pop()
+      .toLowerCase();
+
+
+  const fileName =
+    `${crypto.randomUUID()}.${extension}`;
+
+
+  /*
+    Tentamos primeiro o bucket "mcs".
+  */
+
+  let upload =
+    await sb.storage
+      .from("mcs")
+      .upload(
+        fileName,
+        file,
+        {
+          upsert: false
+        }
+      );
+
+
+  /*
+    Caso o bucket "mcs" não exista,
+    tentamos "mc-photos".
+  */
+
+  if (upload.error) {
+
+    upload =
+      await sb.storage
+        .from("mc-photos")
+        .upload(
+          fileName,
+          file,
+          {
+            upsert: false
+          }
+        );
+
+    if (upload.error) {
+
+      throw new Error(
+        "Não foi possível enviar a foto: " +
+        upload.error.message
+      );
+
+    }
+
+
+    const {
+      data
+    } =
+      sb.storage
+        .from("mc-photos")
+        .getPublicUrl(fileName);
+
+
+    return data.publicUrl;
 
   }
 
@@ -1673,12 +1218,9 @@ async function enviarFoto(
   const {
     data
   } =
-    supabaseClient
-      .storage
+    sb.storage
       .from("mcs")
-      .getPublicUrl(
-        caminho
-      );
+      .getPublicUrl(fileName);
 
 
   return data.publicUrl;
@@ -1686,81 +1228,414 @@ async function enviarFoto(
 }
 
 
-/* =========================================================
-   EXCLUIR MC
-========================================================= */
+/* =========================
+   SALVAR MC
+   ========================= */
 
-async function excluirMC(
-  id
-) {
+async function saveMc(event) {
 
-  const mc =
-    mcs.find(
-      item =>
-        String(item.id) ===
-        String(id)
+  event.preventDefault();
+
+
+  if (!sb) {
+
+    showMessage(
+      "Supabase não inicializado.",
+      "error"
     );
-
-
-  if (!mc) {
 
     return;
 
   }
 
 
-  const confirmar =
-    confirm(
-      `Tem certeza que deseja excluir o MC "${mc.nome}"?`
+  const nome =
+    $("#mcNome")
+      ?.value
+      .trim();
+
+
+  if (!nome) {
+
+    showMessage(
+      "Informe o nome artístico.",
+      "error"
     );
-
-
-  if (!confirmar) {
 
     return;
 
+  }
+
+
+  const button =
+    document.querySelector(
+      '#mcForm button[type="submit"]'
+    );
+
+
+  if (button) {
+    button.disabled = true;
+    button.textContent =
+      "SALVANDO...";
   }
 
 
   try {
 
-    const {
-      error
-    } =
-      await supabaseClient
-        .from("mcs")
-        .delete()
-        .eq(
-          "id",
-          id
-        );
+    let foto =
+      photoData || null;
 
 
-    if (error) {
+    const file =
+      $("#mcFoto")
+        ?.files?.[0];
 
-      throw error;
+
+    if (file) {
+
+      foto =
+        await uploadPhoto(file);
 
     }
 
 
-    mostrarToast(
-      "MC excluído com sucesso."
+    /*
+      Primeiro tentamos usar os nomes
+      em português do painel.
+    */
+
+    const dadosPt = {
+
+      nome: nome,
+
+      instagram:
+        $("#mcInstagram")
+          ?.value
+          .trim() || null,
+
+      pix:
+        $("#mcPix")
+          ?.value
+          .trim() || null,
+
+      participacoes:
+        Number(
+          $("#mcParticipacoes")
+            ?.value || 0
+        ),
+
+      titulos:
+        Number(
+          $("#mcTitulos")
+            ?.value || 0
+        ),
+
+      derrotas:
+        Number(
+          $("#mcDerrotas")
+            ?.value || 0
+        ),
+
+      twolalas:
+        Number(
+          $("#mcTwolalas")
+            ?.value || 0
+        ),
+
+      pontos:
+        Number(
+          $("#mcPontos")
+            ?.value || 0
+        ),
+
+      bio:
+        $("#mcBio")
+          ?.value
+          .trim() || null,
+
+      melhorRima:
+        $("#mcRima")
+          ?.value
+          .trim() || null,
+
+      foto:
+        foto
+
+    };
+
+
+    let result;
+
+
+    if (editingId) {
+
+      result =
+        await sb
+          .from("mcs")
+          .update(dadosPt)
+          .eq(
+            "id",
+            editingId
+          )
+          .select();
+
+
+    } else {
+
+      result =
+        await sb
+          .from("mcs")
+          .insert(dadosPt)
+          .select();
+
+    }
+
+
+    /*
+      Se a tabela usar nomes em inglês,
+      fazemos uma segunda tentativa.
+    */
+
+    if (result.error) {
+
+      console.warn(
+        "Tentativa em português falhou:",
+        result.error.message
+      );
+
+
+      const dadosEn = {
+
+        name: nome,
+
+        instagram:
+          dadosPt.instagram,
+
+        pix:
+          dadosPt.pix,
+
+        participations:
+          dadosPt.participacoes,
+
+        titles:
+          dadosPt.titulos,
+
+        losses:
+          dadosPt.derrotas,
+
+        two_lalas:
+          dadosPt.twolalas,
+
+        points:
+          dadosPt.pontos,
+
+        bio:
+          dadosPt.bio,
+
+        best_rhyme:
+          dadosPt.melhorRima,
+
+        photo_url:
+          dadosPt.foto
+
+      };
+
+
+      if (editingId) {
+
+        result =
+          await sb
+            .from("mcs")
+            .update(dadosEn)
+            .eq(
+              "id",
+              editingId
+            )
+            .select();
+
+      } else {
+
+        result =
+          await sb
+            .from("mcs")
+            .insert(dadosEn)
+            .select();
+
+      }
+
+    }
+
+
+    if (result.error) {
+
+      throw new Error(
+        result.error.message
+      );
+
+    }
+
+
+    $("#mcModal")
+      ?.classList
+      .remove("open");
+
+
+    const wasEditing =
+      Boolean(editingId);
+
+
+    editingId = null;
+    photoData = "";
+
+
+    await loadMcs();
+
+
+    showMessage(
+      wasEditing
+        ? "MC atualizado com sucesso!"
+        : "MC cadastrado com sucesso!",
+      "success"
     );
 
 
-    await carregarMCs();
-
-
-  } catch (erro) {
+  } catch (error) {
 
     console.error(
-      erro
+      "Erro ao salvar MC:",
+      error
     );
 
 
-    mostrarToast(
+    showMessage(
+      "Erro ao salvar MC: " +
+      error.message,
+      "error"
+    );
+
+  } finally {
+
+    if (button) {
+
+      button.disabled = false;
+
+      button.textContent =
+        "SALVAR MC";
+
+    }
+
+  }
+
+}
+
+
+/* =========================
+   EXCLUIR MC
+   ========================= */
+
+async function deleteMc(id) {
+
+  const original =
+    mcs.find(
+      mc =>
+        String(mc.id) === String(id)
+    );
+
+
+  if (!original) return;
+
+
+  const mc =
+    normalizeMc(original);
+
+
+  if (
+    !confirm(
+      `Excluir o cadastro de ${mc.nome}?`
+    )
+  ) {
+    return;
+  }
+
+
+  try {
+
+    /*
+      Primeiro tenta excluir
+      batalhas vinculadas.
+    */
+
+    try {
+
+      await sb
+        .from("battles")
+        .delete()
+        .or(
+          `mc1_id.eq.${id},` +
+          `mc2_id.eq.${id},` +
+          `winner_id.eq.${id}`
+        );
+
+    } catch (e) {
+
+      console.warn(
+        "Não foi possível limpar batalhas:",
+        e
+      );
+
+    }
+
+
+    const {
+      data,
+      error
+    } =
+      await sb
+        .from("mcs")
+        .delete()
+        .eq("id", id)
+        .select("id");
+
+
+    if (error) {
+
+      throw new Error(
+        error.message
+      );
+
+    }
+
+
+    if (
+      !data ||
+      data.length === 0
+    ) {
+
+      throw new Error(
+        "O MC não foi excluído. " +
+        "Verifique as permissões DELETE no Supabase."
+      );
+
+    }
+
+
+    await loadMcs();
+
+
+    showMessage(
+      "MC excluído com sucesso!",
+      "success"
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    showMessage(
       "Erro ao excluir MC: " +
-      erro.message
+      error.message,
+      "error"
     );
 
   }
@@ -1768,362 +1643,31 @@ async function excluirMC(
 }
 
 
-/* =========================================================
-   DASHBOARD
-========================================================= */
-
-function atualizarDashboard() {
-
-  const totalMCs =
-    mcs.length;
-
-
-  const totalPontos =
-    mcs.reduce(
-      (
-        total,
-        mc
-      ) =>
-        total +
-        numero(mc.pontos),
-      0
-    );
-
-
-  const totalTitulos =
-    mcs.reduce(
-      (
-        total,
-        mc
-      ) =>
-        total +
-        numero(mc.titulos),
-      0
-    );
-
-
-  const totalTwolalas =
-    mcs.reduce(
-      (
-        total,
-        mc
-      ) =>
-        total +
-        numero(mc.twolalas),
-      0
-    );
-
-
-  document.getElementById(
-    "metricMcs"
-  ).textContent =
-    totalMCs;
-
-
-  document.getElementById(
-    "metricPoints"
-  ).textContent =
-    totalPontos;
-
-
-  document.getElementById(
-    "metricTitles"
-  ).textContent =
-    totalTitulos;
-
-
-  document.getElementById(
-    "metricTwolalas"
-  ).textContent =
-    totalTwolalas;
-
-
-  renderizarMiniRanking();
-
-}
-
-
-/* =========================================================
-   MINI RANKING
-========================================================= */
-
-function renderizarMiniRanking() {
-
-  const elemento =
-    document.getElementById(
-      "dashRanking"
-    );
-
-
-  const ranking =
-    [...mcs]
-      .sort(
-        (
-          a,
-          b
-        ) =>
-          numero(b.pontos) -
-          numero(a.pontos)
-      )
-      .slice(
-        0,
-        8
-      );
-
-
-  if (!ranking.length) {
-
-    elemento.innerHTML =
-      `<div class="empty">
-         Nenhum MC cadastrado.
-       </div>`;
-
-    return;
-
-  }
-
-
-  elemento.innerHTML =
-    ranking
-      .map(
-        (
-          mc,
-          index
-        ) => `
-
-          <div class="mini-rank">
-
-            <span>
-              #${index + 1}
-            </span>
-
-            <strong>
-              ${escaparHtml(
-                mc.nome || ""
-              )}
-            </strong>
-
-            <span>
-              ${numero(
-                mc.pontos
-              )} pts
-            </span>
-
-          </div>
-
-        `
-      )
-      .join("");
-
-}
-
-
-/* =========================================================
-   RANKING COMPLETO
-========================================================= */
-
-function renderizarRanking() {
-
-  const elemento =
-    document.getElementById(
-      "fullRanking"
-    );
-
-
-  const ranking =
-    [...mcs]
-      .sort(
-        (
-          a,
-          b
-        ) =>
-          numero(b.pontos) -
-          numero(a.pontos)
-      );
-
-
-  if (!ranking.length) {
-
-    elemento.innerHTML =
-      `<div class="empty">
-         Nenhum MC cadastrado.
-       </div>`;
-
-    return;
-
-  }
-
-
-  elemento.innerHTML =
-    ranking
-      .map(
-        (
-          mc,
-          index
-        ) => {
-
-          const participacoes =
-            numero(
-              mc.participacoes
-            );
-
-
-          const pontos =
-            numero(
-              mc.pontos
-            );
-
-
-          const desempenho =
-            participacoes > 0
-              ? Math.round(
-                  (
-                    pontos /
-                    participacoes
-                  ) * 10
-                ) / 10
-              : 0;
-
-
-          return `
-
-            <div class="full-rank">
-
-              <div class="position">
-
-                #${index + 1}
-
-              </div>
-
-
-              <div>
-
-                <strong>
-                  ${escaparHtml(
-                    mc.nome || ""
-                  )}
-                </strong>
-
-                <small>
-                  ${escaparHtml(
-                    mc.instagram || ""
-                  )}
-                </small>
-
-              </div>
-
-
-              <div>
-
-                <strong>
-                  ${pontos}
-                </strong>
-
-                <small>
-                  PONTOS
-                </small>
-
-              </div>
-
-
-              <div>
-
-                <strong>
-                  ${numero(
-                    mc.titulos
-                  )}
-                </strong>
-
-                <small>
-                  TÍTULOS
-                </small>
-
-              </div>
-
-
-              <div>
-
-                <strong>
-                  ${numero(
-                    mc.participacoes
-                  )}
-                </strong>
-
-                <small>
-                  PARTIC.
-                </small>
-
-              </div>
-
-
-              <div>
-
-                <strong>
-                  ${desempenho}
-                </strong>
-
-                <small>
-                  PTS/PART.
-                </small>
-
-              </div>
-
-            </div>
-
-          `;
-
-        }
-      )
-      .join("");
-
-}
-
-
-/* =========================================================
-   PESQUISA
-========================================================= */
-
-searchInput.addEventListener(
-  "input",
-  renderizarMCs
-);
-
-
-sortSelect.addEventListener(
-  "change",
-  renderizarMCs
-);
-
-
-/* =========================================================
+/* =========================
    EXPORTAR DADOS
-========================================================= */
+   ========================= */
 
-const quickExport =
-  document.getElementById(
-    "quickExport"
-  );
+function exportData() {
 
-
-quickExport.addEventListener(
-  "click",
-  exportarDados
-);
-
-
-function exportarDados() {
-
-  const dados =
-    JSON.stringify(
-      mcs,
-      null,
-      2
-    );
+  const data =
+    mcs.map(normalizeMc);
 
 
   const blob =
     new Blob(
-      [dados],
+      [
+        JSON.stringify(
+          {
+            version: 2,
+            exportedAt:
+              new Date()
+                .toISOString(),
+            mcs: data
+          },
+          null,
+          2
+        )
+      ],
       {
         type:
           "application/json"
@@ -2132,481 +1676,554 @@ function exportarDados() {
 
 
   const url =
-    URL.createObjectURL(
-      blob
-    );
+    URL.createObjectURL(blob);
 
 
-  const link =
-    document.createElement(
-      "a"
-    );
+  const a =
+    document.createElement("a");
 
 
-  link.href =
-    url;
+  a.href = url;
 
-  link.download =
-    "batalha-da-alcateia-mcs.json";
-
-
-  document.body.appendChild(
-    link
-  );
-
-  link.click();
-
-  link.remove();
+  a.download =
+    "batalha-alcateia-backup.json";
 
 
-  URL.revokeObjectURL(
-    url
-  );
+  document.body.appendChild(a);
+
+  a.click();
+
+  a.remove();
 
 
-  mostrarToast(
-    "Dados exportados."
+  URL.revokeObjectURL(url);
+
+
+  showMessage(
+    "Backup exportado!",
+    "success"
   );
 
 }
 
 
-/* =========================================================
+/* =========================
    IMPORTAR DADOS
-========================================================= */
+   ========================= */
 
-const quickImport =
-  document.getElementById(
-    "quickImport"
-  );
+function importData(file) {
 
-const importFile =
-  document.getElementById(
-    "importFile"
-  );
+  if (!file) return;
 
 
-quickImport.addEventListener(
-  "click",
-  function() {
+  const reader =
+    new FileReader();
 
-    importFile.click();
 
-  }
-);
+  reader.onload =
+    async () => {
 
+      try {
 
-importFile.addEventListener(
-  "change",
-  async function() {
-
-    const arquivo =
-      importFile.files[0];
-
-    if (!arquivo) {
-
-      return;
-
-    }
-
-
-    try {
-
-      const texto =
-        await arquivo.text();
-
-
-      const dados =
-        JSON.parse(
-          texto
-        );
-
-
-      if (
-        !Array.isArray(
-          dados
-        )
-      ) {
-
-        throw new Error(
-          "Arquivo inválido."
-        );
-
-      }
-
-
-      const confirmar =
-        confirm(
-          `Foram encontrados ${dados.length} MC(s). Deseja importar esses dados para o banco online?`
-        );
-
-
-      if (!confirmar) {
-
-        importFile.value =
-          "";
-
-        return;
-
-      }
-
-
-      for (
-        const mc of dados
-      ) {
-
-        const registro = {
-
-          nome:
-            mc.nome || "MC",
-
-          instagram:
-            mc.instagram || "",
-
-          pix:
-            mc.pix || "",
-
-          participacoes:
-            inteiro(
-              mc.participacoes
-            ),
-
-          titulos:
-            inteiro(
-              mc.titulos
-            ),
-
-          derrotas:
-            inteiro(
-              mc.derrotas
-            ),
-
-          twolalas:
-            inteiro(
-              mc.twolalas
-            ),
-
-          pontos:
-            inteiro(
-              mc.pontos
-            ),
-
-          bio:
-            mc.bio || "",
-
-          melhor_rima:
-            mc.melhor_rima || "",
-
-          foto_url:
-            mc.foto_url || null
-
-        };
-
-
-        const {
-          error
-        } =
-          await supabaseClient
-            .from("mcs")
-            .insert(
-              registro
-            );
-
-
-        if (error) {
-
-          throw error;
-
-        }
-
-      }
-
-
-      mostrarToast(
-        "Importação concluída!"
-      );
-
-
-      await carregarMCs();
-
-
-    } catch (erro) {
-
-      console.error(
-        erro
-      );
-
-
-      mostrarToast(
-        "Erro na importação: " +
-        erro.message
-      );
-
-    }
-
-
-    importFile.value =
-      "";
-
-  }
-);
-
-
-/* =========================================================
-   TECLADO
-========================================================= */
-
-document.addEventListener(
-  "keydown",
-  function(event) {
-
-    if (
-      event.key ===
-      "Escape"
-    ) {
-
-      if (
-        mcModal.classList.contains(
-          "open"
-        )
-      ) {
-
-        fecharModal();
-
-      }
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   UTILITÁRIOS
-========================================================= */
-
-function numero(
-  valor
-) {
-
-  const n =
-    Number(valor);
-
-  return Number.isFinite(n)
-    ? n
-    : 0;
-
-}
-
-
-function inteiro(
-  valor
-) {
-
-  const n =
-    parseInt(
-      valor,
-      10
-    );
-
-  return Number.isFinite(n)
-    ? n
-    : 0;
-
-}
-
-
-function obterExtensao(
-  nome
-) {
-
-  const partes =
-    String(nome)
-      .split(".");
-
-  return (
-    partes[
-      partes.length - 1
-    ] || "jpg"
-  )
-    .toLowerCase()
-    .replace(
-      /[^a-z0-9]/g,
-      ""
-    ) || "jpg";
-
-}
-
-
-function normalizarNomeArquivo(
-  nome
-) {
-
-  return String(nome)
-    .normalize("NFD")
-    .replace(
-      /[\u0300-\u036f]/g,
-      ""
-    )
-    .replace(
-      /[^a-zA-Z0-9]+/g,
-      "-"
-    )
-    .replace(
-      /^-+|-+$/g,
-      ""
-    )
-    .toLowerCase() ||
-    "mc";
-
-}
-
-
-function escaparHtml(
-  valor
-) {
-
-  return String(
-    valor ?? ""
-  )
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
-
-}
-
-
-function escaparAtributo(
-  valor
-) {
-
-  return escaparHtml(
-    valor
-  );
-
-}
-
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-let toastTimer = null;
-
-
-function mostrarToast(
-  mensagem
-) {
-
-  if (!toast) {
-
-    return;
-
-  }
-
-
-  toast.textContent =
-    mensagem;
-
-
-  toast.classList.add(
-    "show"
-  );
-
-
-  clearTimeout(
-    toastTimer
-  );
-
-
-  toastTimer =
-    setTimeout(
-      function() {
-
-        toast.classList.remove(
-          "show"
-        );
-
-      },
-      3500
-    );
-
-}
-
-
-/* =========================================================
-   OBSERVAR ALTERAÇÕES DE LOGIN
-========================================================= */
-
-supabaseClient
-  .auth
-  .onAuthStateChange(
-    async (
-      event,
-      session
-    ) => {
-
-      if (
-        event ===
-        "SIGNED_OUT"
-      ) {
-
-        mostrarLogin();
-
-        return;
-
-      }
-
-
-      if (
-        event ===
-          "SIGNED_IN" &&
-        session
-      ) {
-
-        const autorizado =
-          await verificarAdministrador(
-            session.user.id
+        const data =
+          JSON.parse(
+            reader.result
           );
 
 
         if (
-          autorizado
+          !data ||
+          !Array.isArray(data.mcs)
         ) {
 
-          mostrarAplicacao(
-            session.user
+          throw new Error(
+            "Arquivo inválido."
           );
 
         }
 
+
+        /*
+          Importa cada MC para o banco.
+        */
+
+        for (
+          const mc of data.mcs
+        ) {
+
+          const normalized =
+            normalizeMc(mc);
+
+
+          await sb
+            .from("mcs")
+            .insert({
+
+              nome:
+                normalized.nome,
+
+              instagram:
+                normalized.instagram,
+
+              pix:
+                normalized.pix,
+
+              participacoes:
+                normalized.participacoes,
+
+              titulos:
+                normalized.titulos,
+
+              derrotas:
+                normalized.derrotas,
+
+              twolalas:
+                normalized.twolalas,
+
+              pontos:
+                normalized.pontos,
+
+              bio:
+                normalized.bio,
+
+              melhorRima:
+                normalized.melhorRima,
+
+              foto:
+                normalized.foto
+
+            });
+
+        }
+
+
+        await loadMcs();
+
+
+        showMessage(
+          "Dados importados!",
+          "success"
+        );
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+          "Erro ao importar: " +
+          error.message,
+          "error"
+        );
+
       }
 
+    };
+
+
+  reader.readAsText(file);
+
+}
+
+
+/* =========================
+   TROCAR DE TELA
+   ========================= */
+
+function switchView(view) {
+
+  document
+    .querySelectorAll(".view")
+    .forEach(
+      section =>
+        section.classList
+          .remove("active")
+    );
+
+
+  const target =
+    $("#" + view + "View");
+
+
+  if (target) {
+
+    target.classList
+      .add("active");
+
+  }
+
+
+  document
+    .querySelectorAll(".side-link")
+    .forEach(button => {
+
+      button.classList.toggle(
+        "active",
+        button.dataset.view === view
+      );
+
+    });
+
+
+  $("#sidebar")
+    ?.classList
+    .remove("open");
+
+
+  if (view === "dashboard") {
+    renderDashboard();
+  }
+
+  if (view === "mcs") {
+    renderMcs();
+  }
+
+  if (view === "ranking") {
+    renderFullRanking();
+  }
+
+}
+
+
+/* =========================
+   CARREGAR TUDO
+   ========================= */
+
+async function loadAllData() {
+
+  await loadMcs();
+
+}
+
+
+/* =========================
+   EVENTOS DA PÁGINA
+   ========================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  async () => {
+
+    /*
+      Inicializa Supabase.
+    */
+
+    const ok =
+      initializeSupabase();
+
+
+    if (!ok) {
+      return;
     }
-  );
 
 
-/* =========================================================
-   FIM
-========================================================= */
+    /*
+      Navegação lateral.
+    */
 
-console.log(
-  "🐺 Batalha da Alcatéia — Painel carregado."
+    document
+      .querySelectorAll(".side-link")
+      .forEach(button => {
+
+        button.onclick =
+          () =>
+            switchView(
+              button.dataset.view
+            );
+
+      });
+
+
+    /*
+      Botões de nova MC.
+    */
+
+    $("#newMcButton")?.addEventListener(
+      "click",
+      () => openEditor()
+    );
+
+
+    $("#newMcFromDash")?.addEventListener(
+      "click",
+      () => {
+
+        switchView("mcs");
+
+        openEditor();
+
+      }
+    );
+
+
+    $("#quickNewMc")?.addEventListener(
+      "click",
+      () => {
+
+        switchView("mcs");
+
+        openEditor();
+
+      }
+    );
+
+
+    /*
+      Exportar.
+    */
+
+    $("#quickExport")?.addEventListener(
+      "click",
+      exportData
+    );
+
+
+    /*
+      Importar.
+    */
+
+    $("#quickImport")?.addEventListener(
+      "click",
+      () =>
+        $("#importFile")?.click()
+    );
+
+
+    $("#importFile")?.addEventListener(
+      "change",
+      event => {
+
+        const file =
+          event.target.files?.[0];
+
+        if (file) {
+          importData(file);
+        }
+
+      }
+    );
+
+
+    /*
+      Restaurar dados demo.
+      IMPORTANTE:
+      agora não apaga o banco.
+      Apenas avisa que essa função
+      ficará para uma etapa futura.
+    */
+
+    $("#quickReset")?.addEventListener(
+      "click",
+      () => {
+
+        alert(
+          "A restauração de dados demo " +
+          "fica desativada nesta versão " +
+          "para evitar apagar dados reais do banco."
+        );
+
+      }
+    );
+
+
+    /*
+      Busca.
+    */
+
+    $("#searchInput")?.addEventListener(
+      "input",
+      renderMcs
+    );
+
+
+    /*
+      Ordenação.
+    */
+
+    $("#sortSelect")?.addEventListener(
+      "change",
+      renderMcs
+    );
+
+
+    /*
+      Fechar modal.
+    */
+
+    $("#closeModal")?.addEventListener(
+      "click",
+      () => {
+
+        $("#mcModal")
+          ?.classList
+          .remove("open");
+
+      }
+    );
+
+
+    $("#cancelForm")?.addEventListener(
+      "click",
+      () => {
+
+        $("#mcModal")
+          ?.classList
+          .remove("open");
+
+      }
+    );
+
+
+    $("#mcModal")?.addEventListener(
+      "click",
+      event => {
+
+        if (
+          event.target.id ===
+          "mcModal"
+        ) {
+
+          $("#mcModal")
+            ?.classList
+            .remove("open");
+
+        }
+
+      }
+    );
+
+
+    /*
+      Menu mobile.
+    */
+
+    $("#menuButton")?.addEventListener(
+      "click",
+      () => {
+
+        $("#sidebar")
+          ?.classList
+          .toggle("open");
+
+      }
+    );
+
+
+    /*
+      Atualização do preview.
+    */
+
+    [
+      "mcNome",
+      "mcPontos",
+      "mcTitulos",
+      "mcTwolalas"
+    ]
+      .forEach(id => {
+
+        $("#" + id)?.addEventListener(
+          "input",
+          updatePreview
+        );
+
+      });
+
+
+    /*
+      Foto.
+    */
+
+    $("#mcFoto")?.addEventListener(
+      "change",
+      event => {
+
+        const file =
+          event.target.files?.[0];
+
+
+        if (!file) return;
+
+
+        if (
+          file.size >
+          5 * 1024 * 1024
+        ) {
+
+          showMessage(
+            "A foto deve ter no máximo 5 MB.",
+            "error"
+          );
+
+          event.target.value = "";
+
+          return;
+        }
+
+
+        const reader =
+          new FileReader();
+
+
+        reader.onload =
+          () => {
+
+            photoData =
+              reader.result;
+
+
+            if ($("#photoPreview")) {
+
+              $("#photoPreview").innerHTML =
+                `
+                  <img
+                    src="${escapeHtml(photoData)}"
+                    alt=""
+                    style="
+                      width:100%;
+                      height:100%;
+                      object-fit:cover;
+                    "
+                  >
+                `;
+
+            }
+
+          };
+
+
+        reader.readAsDataURL(file);
+
+      }
+    );
+
+
+    /*
+      Formulário.
+    */
+
+    $("#mcForm")?.addEventListener(
+      "submit",
+      saveMc
+    );
+
+
+    /*
+      Verifica sessão existente.
+    */
+
+    await checkSession();
+
+  }
 );
+
+
+/* =========================
+   DISPONIBILIZAR FUNÇÕES
+   ========================= */
+
+window.login = login;
+window.logout = logout;
+window.openEditor = openEditor;
+window.deleteMc = deleteMc;
+window.switchView = switchView;
+window.exportData = exportData;
