@@ -3,1049 +3,294 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Batalha da Alcatéia — Site Oficial</title>
-
+<title>Batalha da Alcateia — Site Oficial</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
-
-body{
-  font-family:Time News Roman,Helvetica,sans-serif;
-  background:#080808;
-  color:#fff;
-}
-
-header{
-  background:linear-gradient(135deg,#0b45ff,#e00000);
-  padding:25px 15px;
-  text-align:center;
-}
-
-header h1{
-  font-size:32px;
-  font-weight:900;
-  text-transform:uppercase;
-}
-
-header p{
-  margin-top:8px;
-  font-size:14px;
-}
-
-nav{
-  display:flex;
-  overflow-x:auto;
-  gap:8px;
-  padding:10px;
-  background:#111;
-  position:sticky;
-  top:0;
-  z-index:10;
-}
-
-nav button{
-  border:0;
-  padding:10px 14px;
-  border-radius:8px;
-  background:#222;
-  color:#fff;
-  font-weight:bold;
-  white-space:nowrap;
-}
-
-nav button:hover{
-  background:#e00000;
-}
-
-section{
-  padding:25px 15px;
-  max-width:1100px;
-  margin:auto;
-}
-
-h2{
-  margin-bottom:18px;
-  font-size:25px;
-  border-left:5px solid #e00000;
-  padding-left:10px;
-}
-
-.card{
-  background:#151515;
-  border:1px solid #292929;
-  border-radius:12px;
-  padding:15px;
-  margin-bottom:12px;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:
-  repeat(auto-fit,minmax(220px,1fr));
-  gap:15px;
-}
-
-input,
-select,
-textarea{
-  width:100%;
-  padding:12px;
-  margin:6px 0;
-  border-radius:8px;
-  border:1px solid #444;
-  background:#0d0d0d;
-  color:#fff;
-}
-
-.btn{
-  border:0;
-  padding:11px 16px;
-  border-radius:8px;
-  background:#0b45ff;
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.btn-danger{
-  background:#d90000;
-}
-
-.btn-green{
-  background:#008f45;
-}
-
-
-/* =========================================
-   FOTO DOS MCs
-========================================= */
-
-.mc-photo{
-  width:100%;
-  height:230px;
-  object-fit:cover;
-  border-radius:10px;
-  background:#222;
-}
-
-
-/* =========================================
-   RANKING
-========================================= */
-
-.rank{
-  position:relative;
-  overflow:hidden;
-
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-
-  padding:14px;
-
-  background:#171717;
-
-  border-radius:10px;
-
-  margin-bottom:8px;
-
-  transition:
-    transform .3s ease,
-    box-shadow .3s ease;
-}
-
-.rank:hover{
-  transform:scale(1.02);
-}
-
-.points{
-  font-size:20px;
-  font-weight:bold;
-}
-
-.hidden{
-  display:none!important;
-}
-
-.message{
-  padding:12px;
-  border-radius:8px;
-  background:#202020;
-  margin:10px 0;
-}
-
-footer{
-  text-align:center;
-  padding:30px 15px;
-  background:#111;
-  color:#aaa;
-}
-
-
-/* =========================================
-   🥇 1º LUGAR — OURO
-========================================= */
-
-.rank.gold{
-
-  border:2px solid #ffd700;
-
-  box-shadow:
-    0 0 8px #ffd700,
-    0 0 18px rgba(255,215,0,.7),
-    inset 0 0 12px rgba(255,215,0,.15);
-
-  animation:
-    goldGlow 2s infinite alternate;
-}
-
-.rank.gold strong{
-
-  color:#ffd700;
-
-  text-shadow:
-    0 0 5px #ffd700,
-    0 0 12px #ffb700;
-}
-
-
-/* =========================================
-   ✨ LUZ DOURADA PASSANDO PELO CARD
-========================================= */
-
-.rank.gold::after{
-
-  content:"";
-
-  position:absolute;
-
-  top:-50%;
-  left:-100%;
-
-  width:45%;
-  height:200%;
-
-  background:linear-gradient(
-    90deg,
-    transparent,
-    rgba(255,255,255,.15),
-    rgba(255,255,255,.85),
-    rgba(255,215,0,.45),
-    transparent
-  );
-
-  transform:skewX(-20deg);
-
-  animation:
-    goldLight 3s infinite;
-
-  pointer-events:none;
-}
-
-
-/* =========================================
-   MOVIMENTO DA LUZ
-========================================= */
-
-@keyframes goldLight{
-
-  0%{
-    left:-100%;
-  }
-
-  45%{
-    left:130%;
-  }
-
-  100%{
-    left:130%;
-  }
-
-}
-
-
-/* =========================================
-   BRILHO DO OURO
-========================================= */
-
-@keyframes goldGlow{
-
-  from{
-
-    box-shadow:
-      0 0 6px #ffd700,
-      0 0 12px rgba(255,215,0,.5);
-
-  }
-
-  to{
-
-    box-shadow:
-      0 0 12px #ffd700,
-      0 0 30px rgba(255,215,0,.9),
-      0 0 45px rgba(255,190,0,.4);
-
-  }
-
-}
-
-
-/* =========================================
-   🥈 2º LUGAR — PRATA
-========================================= */
-
-.rank.silver{
-
-  border:2px solid #d9d9d9;
-
-  box-shadow:
-    0 0 8px #d9d9d9,
-    0 0 18px rgba(220,220,220,.6),
-    inset 0 0 12px rgba(220,220,220,.12);
-
-  animation:
-    silverGlow 2s infinite alternate;
-}
-
-.rank.silver strong{
-
-  color:#eeeeee;
-
-  text-shadow:
-    0 0 5px #ffffff,
-    0 0 12px #bdbdbd;
-}
-
-
-@keyframes silverGlow{
-
-  from{
-
-    box-shadow:
-      0 0 6px #cfcfcf,
-      0 0 12px rgba(220,220,220,.5);
-
-  }
-
-  to{
-
-    box-shadow:
-      0 0 12px #ffffff,
-      0 0 30px rgba(220,220,220,.9),
-      0 0 45px rgba(255,255,255,.35);
-
-  }
-
-}
-
-
-/* =========================================
-   🥉 3º LUGAR — BRONZE
-========================================= */
-
-.rank.bronze{
-
-  border:2px solid #cd7f32;
-
-  box-shadow:
-    0 0 8px #cd7f32,
-    0 0 18px rgba(205,127,50,.65),
-    inset 0 0 12px rgba(205,127,50,.12);
-
-  animation:
-    bronzeGlow 2s infinite alternate;
-}
-
-.rank.bronze strong{
-
-  color:#cd7f32;
-
-  text-shadow:
-    0 0 5px #cd7f32,
-    0 0 12px #a85c20;
-}
-
-
-@keyframes bronzeGlow{
-
-  from{
-
-    box-shadow:
-      0 0 6px #cd7f32,
-      0 0 12px rgba(205,127,50,.5);
-
-  }
-
-  to{
-
-    box-shadow:
-      0 0 12px #cd7f32,
-      0 0 30px rgba(205,127,50,.9),
-      0 0 45px rgba(170,80,20,.35);
-
-  }
-
-}
-
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:#080808;color:#fff}
+header{background:linear-gradient(135deg,#0b45ff,#e00000);padding:25px 15px;text-align:center}
+header h1{font-size:32px;font-weight:900;text-transform:uppercase}
+header p{margin-top:8px;font-size:14px}
+nav{display:flex;overflow-x:auto;gap:8px;padding:10px;background:#111;position:sticky;top:0;z-index:10}
+nav button{border:0;padding:10px 14px;border-radius:8px;background:#222;color:#fff;font-weight:bold;white-space:nowrap}
+nav button:hover{background:#e00000}
+section{padding:25px 15px;max-width:1100px;margin:auto}
+h2{margin-bottom:18px;font-size:25px;border-left:5px solid #e00000;padding-left:10px}
+.card{background:#151515;border:1px solid #292929;border-radius:12px;padding:15px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}
+input,select,textarea{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #444;background:#0d0d0d;color:#fff}
+.btn{border:0;padding:11px 16px;border-radius:8px;background:#0b45ff;color:white;font-weight:bold;cursor:pointer}
+.btn-danger{background:#d90000}.btn-green{background:#008f45}
+.mc-photo{width:100%;height:230px;object-fit:cover;border-radius:10px;background:#222}
+.rank{position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:center;padding:14px;background:#171717;border-radius:10px;margin-bottom:8px;transition:transform .3s ease,box-shadow .3s ease}
+.rank:hover{transform:scale(1.02)}
+.points{font-size:20px;font-weight:bold}
+.hidden{display:none!important}.message{padding:12px;border-radius:8px;background:#202020;margin:10px 0}
+footer{text-align:center;padding:30px 15px;background:#111;color:#aaa}
+
+/* PÓDIO */
+.rank.gold{border:2px solid #ffd700;box-shadow:0 0 8px #ffd700,0 0 18px rgba(255,215,0,.7),inset 0 0 12px rgba(255,215,0,.15);animation:goldGlow 2s infinite alternate}
+.rank.gold strong{color:#ffd700;text-shadow:0 0 5px #ffd700,0 0 12px #ffb700}
+.rank.gold::after{content:"";position:absolute;top:-50%;left:-100%;width:45%;height:200%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),rgba(255,255,255,.85),rgba(255,215,0,.45),transparent);transform:skewX(-20deg);animation:goldLight 3s infinite;pointer-events:none}
+@keyframes goldLight{0%{left:-100%}45%{left:130%}100%{left:130%}}
+@keyframes goldGlow{from{box-shadow:0 0 6px #ffd700,0 0 12px rgba(255,215,0,.5)}to{box-shadow:0 0 12px #ffd700,0 0 30px rgba(255,215,0,.9),0 0 45px rgba(255,190,0,.4)}}
+.rank.silver{border:2px solid #d9d9d9;box-shadow:0 0 8px #d9d9d9,0 0 18px rgba(220,220,220,.6),inset 0 0 12px rgba(220,220,220,.12);animation:silverGlow 2s infinite alternate}
+.rank.silver strong{color:#eee;text-shadow:0 0 5px #fff,0 0 12px #bdbdbd}
+@keyframes silverGlow{from{box-shadow:0 0 6px #cfcfcf,0 0 12px rgba(220,220,220,.5)}to{box-shadow:0 0 12px #fff,0 0 30px rgba(220,220,220,.9),0 0 45px rgba(255,255,255,.35)}}
+.rank.bronze{border:2px solid #cd7f32;box-shadow:0 0 8px #cd7f32,0 0 18px rgba(205,127,50,.65),inset 0 0 12px rgba(205,127,50,.12);animation:bronzeGlow 2s infinite alternate}
+.rank.bronze strong{color:#cd7f32;text-shadow:0 0 5px #cd7f32,0 0 12px #a85c20}
+@keyframes bronzeGlow{from{box-shadow:0 0 6px #cd7f32,0 0 12px rgba(205,127,50,.5)}to{box-shadow:0 0 12px #cd7f32,0 0 30px rgba(205,127,50,.9),0 0 45px rgba(170,80,20,.35)}}
 </style>
 </head>
 
 <body>
-
 <header>
-
 <h1>🐺 Batalha da Alcateia</h1>
-
-<p>
-Site Oficial — Parintins, Amazonas
-</p>
-
+<p>Site Oficial — Parintins, Amazonas</p>
 </header>
 
 <nav>
-
-<button onclick="showSection('inicio')">
-Início
-</button>
-
-<button onclick="showSection('ranking')">
-Ranking
-</button>
-
-<button onclick="showSection('mcs')">
-MCs
-</button>
-
-<button onclick="showSection('batalhas')">
-Batalhas
-</button>
-
-<button onclick="showSection('eventos')">
-Eventos
-</button>
-
-<button onclick="showSection('destaques')">
-Destaques
-</button>
-
-<button onclick="showSection('galeria')">
-Galeria
-</button>
-
-<button onclick="showSection('parcerias')">
-Parcerias
-</button>
-
-<button onclick="showSection('admin')">
-Admin
-</button>
-
+<button onclick="showSection('inicio')">Início</button>
+<button onclick="showSection('ranking')">Ranking</button>
+<button onclick="showSection('mcs')">MCs</button>
+<button onclick="showSection('batalhas')">Batalhas</button>
+<button onclick="showSection('eventos')">Eventos</button>
+<button onclick="showSection('destaques')">Destaques</button>
+<button onclick="showSection('galeria')">Galeria</button>
+<button onclick="showSection('parcerias')">Parcerias</button>
+<button onclick="showSection('admin')">Admin</button>
 </nav>
 
 <section id="inicio">
-
-<h2>
-Batalha da Alcateia
-</h2>
-
-<div class="card">
-
-<h3>
-🔥 A batalha de MCs de Parintins
-</h3>
-
-<p>
-Acompanhe o ranking, os MCs,
-resultados, eventos e todos os
-destaques da Batalha da Alcateia.
-</p>
-
-</div>
-
+<h2>Batalha da Alcateia</h2>
+<div class="card"><h3>🔥 A batalha de MCs de Parintins</h3><p>Acompanhe o ranking, os MCs, resultados, eventos e todos os destaques da Batalha da Alcateia.</p></div>
 </section>
 
-
-<section id="ranking" class="hidden">
-
-<h2>
-🏆 Ranking
-</h2>
-
-<div id="rankingList">
-Carregando ranking...
-</div>
-
-</section>
-
-
-<section id="mcs" class="hidden">
-
-<h2>
-🎤 MCs
-</h2>
-
-<div id="mcList" class="grid">
-Carregando MCs...
-</div>
-
-</section>
-
-
-<section id="batalhas" class="hidden">
-
-<h2>
-⚔️ Batalhas
-</h2>
-
-<div id="battleList">
-Carregando batalhas...
-</div>
-
-</section>
-
-
-<section id="eventos" class="hidden">
-
-<h2>
-📅 Próximos Eventos
-</h2>
-
-<div id="eventList">
-Carregando eventos...
-</div>
-
-</section>
-
-
-<section id="destaques" class="hidden">
-
-<h2>
-⭐ Destaques
-</h2>
-
-<div id="highlightList">
-Carregando destaques...
-</div>
-
-</section>
-
-
-<section id="galeria" class="hidden">
-
-<h2>
-📸 Galeria
-</h2>
-
-<div id="galleryList" class="grid">
-Carregando fotos...
-</div>
-
-</section>
-
+<section id="ranking" class="hidden"><h2>🏆 Ranking</h2><div id="rankingList">Carregando ranking...</div></section>
+<section id="mcs" class="hidden"><h2>🎤 MCs</h2><div id="mcList" class="grid">Carregando MCs...</div></section>
+<section id="batalhas" class="hidden"><h2>⚔️ Batalhas</h2><div id="battleList">Carregando batalhas...</div></section>
+<section id="eventos" class="hidden"><h2>📅 Próximos Eventos</h2><div id="eventList">Carregando eventos...</div></section>
+<section id="destaques" class="hidden"><h2>⭐ Destaques</h2><div id="highlightList">Carregando destaques...</div></section>
+<section id="galeria" class="hidden"><h2>📸 Galeria</h2><div id="galleryList" class="grid">Carregando fotos...</div></section>
 
 <section id="parcerias" class="hidden">
-
-<h2>
-🤝 Parcerias
-</h2>
-
-<div id="partnershipBox">
-
-<div class="card">
-
-Entre em contato com a organização
-da Batalha da Alcateia para apoiar,
-patrocinar ou estabelecer uma parceria.
-
-</div>
-
-</div>
-
+<h2>🤝 Parcerias</h2>
+<div id="partnershipBox"><div class="card">Entre em contato com a organização da Batalha da Alcateia para apoiar, patrocinar ou estabelecer uma parceria.</div></div>
 </section>
 
-
 <section id="admin" class="hidden">
-
-<h2>
-🔐 Área Administrativa
-</h2>
-
+<h2>🔐 Área Administrativa</h2>
 <div id="loginBox" class="card">
-
-<input
-id="loginEmail"
-type="email"
-placeholder="E-mail"
->
-
-<input
-id="loginPassword"
-type="password"
-placeholder="Senha"
->
-
-<button
-class="btn"
-onclick="login()"
->
-Entrar
-</button>
-
+<input id="loginEmail" type="email" placeholder="E-mail">
+<input id="loginPassword" type="password" placeholder="Senha">
+<button class="btn" onclick="login()">Entrar</button>
 <div id="loginMessage"></div>
-
 </div>
 
 <div id="adminPanel" class="hidden">
-
 <div class="card">
-
-<h3>
-Adicionar MC
-</h3>
-
-<input
-id="mcName"
-placeholder="Nome do MC"
->
-
-<input
-id="mcCity"
-placeholder="Cidade"
-value="Parintins"
->
-
-<input
-id="mcInstagram"
-placeholder="Instagram"
->
-
-<input
-id="mcPhoto"
-type="file"
-accept="image/*"
->
-
-<button
-class="btn btn-green"
-onclick="addMc()"
->
-Adicionar MC
-</button>
-
+<h3>Adicionar MC</h3>
+<input id="mcName" placeholder="Nome do MC">
+<input id="mcCity" placeholder="Cidade" value="Parintins">
+<input id="mcInstagram" placeholder="Instagram">
+<input id="mcPhoto" type="file" accept="image/*">
+<button class="btn btn-green" onclick="addMc()">Adicionar MC</button>
 </div>
 
 <div class="card">
-
-<h3>
-MCs cadastrados
-</h3>
-
-<div id="adminMcList">
-Carregando...
+<h3>MCs cadastrados</h3>
+<div id="adminMcList">Carregando...</div>
 </div>
 
+<button class="btn btn-danger" onclick="logout()">Sair</button>
 </div>
-
-<button
-class="btn btn-danger"
-onclick="logout()"
->
-Sair
-</button>
-
-</div>
-
 </section>
 
-<footer>
-
-Batalha da Alcateia © 2026
-
-<br>
-
-Parintins — Amazonas
-
-</footer>
+<footer>Batalha da Alcateia © 2026<br>Parintins — Amazonas</footer>
 
 <script>
-
-const SUPABASE_URL =
-"https://phhltrrzofbmtufmpdab.supabase.co";
-
-const SUPABASE_KEY =
-"sb_publishable_NiOLoIKHl1XogKjk02vt5A_SBjJ_HAA";
-
-const sb =
-supabase.createClient(
-SUPABASE_URL,
-SUPABASE_KEY
-);
-
+const SUPABASE_URL="https://phhltrrzofbmtufmpdab.supabase.co";
+const SUPABASE_KEY="sb_publishable_NiOLoIKHl1XogKjk02vt5A_SBjJ_HAA";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 function showSection(id){
-
-document
-.querySelectorAll("section")
-.forEach(section=>{
-section.classList.add("hidden");
-});
-
-document
-.getElementById(id)
-.classList.remove("hidden");
-
+document.querySelectorAll("section").forEach(section=>section.classList.add("hidden"));
+document.getElementById(id).classList.remove("hidden");
 }
-
 
 async function login(){
-
-const email =
-document
-.getElementById("loginEmail")
-.value
-.trim();
-
-const password =
-document
-.getElementById("loginPassword")
-.value;
-
-const message =
-document
-.getElementById("loginMessage");
-
-if(!email || !password){
-
-message.innerHTML =
-'<div class="message">Preencha e-mail e senha.</div>';
-
-return;
-
-}
-
-const {data,error} =
-await sb.auth.signInWithPassword({
-
-email,
-password
-
-});
-
-if(error){
-
-message.innerHTML =
-'<div class="message">Erro ao entrar: '
-+
-escapeHtml(error.message)
-+
-'</div>';
-
-return;
-
-}
-
-message.innerHTML =
-'<div class="message">Login realizado!</div>';
-
-document
-.getElementById("loginBox")
-.classList.add("hidden");
-
-document
-.getElementById("adminPanel")
-.classList.remove("hidden");
-
+const email=document.getElementById("loginEmail").value.trim();
+const password=document.getElementById("loginPassword").value;
+const message=document.getElementById("loginMessage");
+if(!email||!password){message.innerHTML='<div class="message">Preencha e-mail e senha.</div>';return}
+const {data,error}=await sb.auth.signInWithPassword({email,password});
+if(error){message.innerHTML='<div class="message">Erro ao entrar: '+escapeHtml(error.message)+'</div>';return}
+message.innerHTML='<div class="message">Login realizado!</div>';
+document.getElementById("loginBox").classList.add("hidden");
+document.getElementById("adminPanel").classList.remove("hidden");
 loadAdminMcs();
-
 }
-
 
 async function logout(){
-
 await sb.auth.signOut();
-
-document
-.getElementById("loginBox")
-.classList.remove("hidden");
-
-document
-.getElementById("adminPanel")
-.classList.add("hidden");
-
+document.getElementById("loginBox").classList.remove("hidden");
+document.getElementById("adminPanel").classList.add("hidden");
 }
-
 
 async function loadMcs(){
-
-const container =
-document.getElementById("mcList");
-
-const {data,error} =
-await sb
-.from("mcs")
-.select("*")
-.order("name");
-
-if(error){
-
-container.innerHTML =
-'<div class="message">Erro ao carregar MCs.</div>';
-
-return;
-
-}
-
-if(!data || !data.length){
-
-container.innerHTML =
-'<div class="message">Nenhum MC cadastrado.</div>';
-
-return;
-
-}
-
-container.innerHTML =
-data.map(mc=>`
-
+const container=document.getElementById("mcList");
+const {data,error}=await sb.from("mcs").select("*").order("name");
+if(error){container.innerHTML='<div class="message">Erro ao carregar MCs.</div>';return}
+if(!data||!data.length){container.innerHTML='<div class="message">Nenhum MC cadastrado.</div>';return}
+container.innerHTML=data.map(mc=>`
 <div class="card">
-
-${
-mc.photo_url
-?
-`
-<img
-src="${escapeHtml(mc.photo_url)}"
-class="mc-photo"
->
-`
-:
-`
-<div
-class="mc-photo"
-style="
-display:flex;
-align-items:center;
-justify-content:center;
-"
->
-🎤
-</div>
-`
+${mc.photo_url?`<img src="${escapeHtml(mc.photo_url)}" class="mc-photo">`:`<div class="mc-photo" style="display:flex;align-items:center;justify-content:center;">🎤</div>`}
+<h3>${escapeHtml(mc.name)}</h3>
+<p>${escapeHtml(mc.city||"Parintins")}</p>
+${mc.instagram?`<p>${escapeHtml(mc.instagram)}</p>`:""}
+</div>`).join("");
 }
-
-<h3>
-${escapeHtml(mc.name)}
-</h3>
-
-<p>
-${escapeHtml(mc.city || "Parintins")}
-</p>
-
-${
-mc.instagram
-?
-`
-<p>
-${escapeHtml(mc.instagram)}
-</p>
-`
-:
-""
-}
-
-</div>
-
-`).join("");
-
-}
-
 
 async function loadRanking(){
+const container=document.getElementById("rankingList");
+const {data,error}=await sb.from("ranking").select("*").order("points",{ascending:false});
+if(error){container.innerHTML='<div class="message">Erro ao carregar ranking.</div>';return}
+if(!data||!data.length){container.innerHTML='<div class="message">Ranking vazio.</div>';return}
 
-const container =
-document.getElementById("rankingList");
-
-const {data,error} =
-await sb
-.from("ranking")
-.select("*")
-.order("points",{ascending:false});
-
-if(error){
-
-container.innerHTML =
-'<div class="message">Erro ao carregar ranking.</div>';
-
-return;
-
-}
-
-if(!data || !data.length){
-
-container.innerHTML =
-'<div class="message">Ranking vazio.</div>';
-
-return;
-
-}
-
-container.innerHTML =
-data.map((mc,index)=>{
-
+container.innerHTML=data.map((mc,index)=>{
 let medalClass="";
-
-if(index===0){
-medalClass="gold";
-}
-
-if(index===1){
-medalClass="silver";
-}
-
-if(index===2){
-medalClass="bronze";
-}
+if(index===0)medalClass="gold";
+if(index===1)medalClass="silver";
+if(index===2)medalClass="bronze";
 
 return `
-
 <div class="rank ${medalClass}">
-
 <div>
-
-<strong>
-
-${
-index===0
-?
-"👑🥇 "
-:
-index===1
-?
-"🥈 "
-:
-index===2
-?
-"🥉 "
-:
-""
-}
-
-${index+1}º —
-${escapeHtml(mc.name)}
-
-</strong>
-
-<div>
-${escapeHtml(mc.city || "")}
+<strong>${index===0?"👑🥇 ":index===1?"🥈 ":index===2?"🥉 ":""}${index+1}º — ${escapeHtml(mc.name)}</strong>
+<div>${escapeHtml(mc.city||"")}</div>
 </div>
-
-</div>
-
-<div class="points">
-
-${mc.points} pts
-
-</div>
-
-</div>
-
-`;
-
+<div class="points">${mc.points} pts</div>
+</div>`;
 }).join("");
+}
 
-}async function loadBattles(){
+async function loadBattles(){
 const container=document.getElementById("battleList");
-
 const {data,error}=await sb.from("battles").select(`
-*,mc1:mcs!battles_mc1_id_fkey(name),
-mc2:mcs!battles_mc2_id_fkey(name),
-winner:mcs!battles_winner_id_fkey(name)
+*,mc1:mcs!battles_mc1_id_fkey(name),mc2:mcs!battles_mc2_id_fkey(name),winner:mcs!battles_winner_id_fkey(name)
 `).order("created_at",{ascending:false});
-
-if(error){
-container.innerHTML='<div class="message">Erro ao carregar batalhas.</div>';
-return;
-}
-
-if(!data||!data.length){
-container.innerHTML='<div class="message">Nenhuma batalha registrada.</div>';
-return;
-}
-
+if(error){container.innerHTML='<div class="message">Erro ao carregar batalhas.</div>';return}
+if(!data||!data.length){container.innerHTML='<div class="message">Nenhuma batalha registrada.</div>';return}
 container.innerHTML=data.map(b=>`
 <div class="card">
 <h3>${escapeHtml(b.mc1?.name||"?")} × ${escapeHtml(b.mc2?.name||"?")}</h3>
 <p>Fase: ${escapeHtml(b.phase||"")}</p>
 <p>Placar: ${escapeHtml(b.score||"")}</p>
-<p>Vencedor:
-<strong>${escapeHtml(b.winner?.name||"Não informado")}</strong>
-</p>
-</div>
-`).join("");
+<p>Vencedor: <strong>${escapeHtml(b.winner?.name||"Não informado")}</strong></p>
+</div>`).join("");
 }
-
 
 async function loadEvents(){
 const container=document.getElementById("eventList");
-
-const {data,error}=await sb.from("events")
-.select("*")
-.order("event_date",{ascending:true});
-
-if(error){
-container.innerHTML='<div class="message">Erro ao carregar eventos.</div>';
-return;
+const {data,error}=await sb.from("events").select("*").order("event_date",{ascending:true});
+if(error){container.innerHTML='<div class="message">Erro ao carregar eventos.</div>';return}
+if(!data||!data.length){container.innerHTML='<div class="message">Nenhum evento cadastrado.</div>';return}
+container.innerHTML=data.map(event=>`
+<div class="card">
+<h3>${escapeHtml(event.name||"")}</h3>
+<p>📅 ${escapeHtml(event.event_date||"")}</p>
+<p>⏰ ${escapeHtml(event.event_time||"")}</p>
+<p>📍 ${escapeHtml(event.location||"")}</p>
+${event.prize?`<p>🏆 ${escapeHtml(event.prize)}</p>`:""}
+</div>`).join("");
 }
 
-if(!data||!data.length){
-container.innerHTML='<divasync function initialize(){
+async function loadHighlights(){
+const container=document.getElementById("highlightList");
+const {data,error}=await sb.from("highlights").select("*").order("id");
+if(error){container.innerHTML='<div class="message">Cadastre a tabela highlights no Supabase.</div>';return}
+if(!data||!data.length){container.innerHTML='<div class="message">Nenhum destaque cadastrado.</div>';return}
+container.innerHTML=data.map(item=>`
+<div class="card"><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description||"A definir")}</p></div>`).join("");
+}
 
-loadMcs();
+async function loadGallery(){
+const container=document.getElementById("galleryList");
+const {data,error}=await sb.from("photos").select("*").order("created_at",{ascending:false});
+if(error){container.innerHTML='<div class="message">Erro ao carregar galeria.</div>';return}
+if(!data||!data.length){container.innerHTML='<div class="message">Nenhuma foto cadastrada.</div>';return}
+container.innerHTML=data.map(photo=>`
+<div class="card"><img src="${escapeHtml(photo.photo_url)}" class="mc-photo">${photo.caption?`<p>${escapeHtml(photo.caption)}</p>`:""}</div>`).join("");
+}
 
-loadRanking();
+async function addMc(){
+const name=document.getElementById("mcName").value.trim();
+const city=document.getElementById("mcCity").value.trim();
+const instagram=document.getElementById("mcInstagram").value.trim();
+const file=document.getElementById("mcPhoto").files[0];
+if(!name){alert("Digite o nome do MC.");return}
+let photo_url=null;
 
-loadBattles();
+if(file){
+const ext=file.name.split(".").pop();
+const fileName=crypto.randomUUID()+"."+ext;
+const {error:uploadError}=await sb.storage.from("mc-photos").upload(fileName,file);
+if(uploadError){alert("Erro ao enviar foto: "+uploadError.message);return}
+const {data:urlData}=sb.storage.from("mc-photos").getPublicUrl(fileName);
+photo_url=urlData.publicUrl;
+}
 
-loadEvents();
+const {error}=await sb.from("mcs").insert({name,city,instagram,photo_url});
+if(error){alert("Erro ao cadastrar MC: "+error.message);return}
+alert("MC cadastrado com sucesso!");
+document.getElementById("mcName").value="";
+document.getElementById("mcInstagram").value="";
+document.getElementById("mcPhoto").value="";
+loadMcs();loadRanking();loadAdminMcs();
+}
 
-loadHighlights();
+async function loadAdminMcs(){
+const container=document.getElementById("adminMcList");
+const {data,error}=await sb.from("mcs").select("*").order("name");
+if(error){container.innerHTML='<div class="message">Erro: '+escapeHtml(error.message)+'</div>';return}
+if(!data||!data.length){container.innerHTML='<div class="message">Nenhum MC cadastrado.</div>';return}
+container.innerHTML=data.map(mc=>`
+<div class="card">
+<strong>${escapeHtml(mc.name)}</strong><br><br>
+<button class="btn btn-danger" onclick="deleteMc('${mc.id}',${JSON.stringify(mc.name)})">🗑️ Excluir</button>
+</div>`).join("");
+}
 
-loadGallery();
+async function deleteMc(id,name){
+if(!confirm('Deseja realmente excluir o MC "'+name+'"?'))return;
+try{
+const {error:battleError}=await sb.from("battles").delete().or(`mc1_id.eq.${id},mc2_id.eq.${id},winner_id.eq.${id}`);
+if(battleError){alert("Não foi possível excluir as batalhas vinculadas:\n"+battleError.message);return}
+const {data,error}=await sb.from("mcs").delete().eq("id",id).select("id");
+if(error){alert("Erro ao excluir MC:\n"+error.message);return}
+if(!data||data.length===0){alert("O MC não foi excluído. Verifique a permissão DELETE no Supabase.");return}
+alert("MC excluído com sucesso!");
+loadAdminMcs();loadMcs();loadRanking();loadBattles();
+}catch(error){alert("Erro inesperado:\n"+error.message)}
+}
 
+function escapeHtml(value){
+if(value===null||value===undefined)return "";
+return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+}
 
+async function initialize(){
+loadMcs();loadRanking();loadBattles();loadEvents();loadHighlights();loadGallery();
 const {data}=await sb.auth.getSession();
-
-
 if(data.session){
-
-document
-.getElementById("loginBox")
-.classList
-.add("hidden");
-
-document
-.getElementById("adminPanel")
-.classList
-.remove("hidden");
-
+document.getElementById("loginBox").classList.add("hidden");
+document.getElementById("adminPanel").classList.remove("hidden");
 loadAdminMcs();
-
 }
-
 }
-
 
 initialize();
-
 </script>
-
 </body>
-
 </html>
