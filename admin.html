@@ -2,157 +2,1988 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#090909">
-  <meta name="description" content="Painel administrativo da Batalha da Alcatéia">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <meta name="theme-color"
+        content="#090909">
+
+  <meta name="description"
+        content="Painel administrativo da Batalha da Alcatéia">
+
   <title>Admin | Batalha da Alcatéia</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css">
+
+  <!-- FONTES -->
+  <link rel="preconnect"
+        href="https://fonts.googleapis.com">
+
+  <link rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+  <!-- CSS DO PAINEL -->
+  <link rel="stylesheet"
+        href="admin.css">
+
+  <style>
+
+    /* =====================================================
+       TELA DE LOGIN
+    ===================================================== */
+
+    #loginScreen {
+      position: fixed;
+      inset: 0;
+      background: #090909;
+      z-index: 9999;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 20px;
+    }
+
+    .login-box {
+      width: min(430px, 100%);
+
+      background: #111;
+
+      border: 1px solid #292929;
+
+      border-radius: 18px;
+
+      padding: 28px;
+
+      box-shadow:
+        0 20px 60px rgba(0,0,0,.55);
+    }
+
+    .login-box h1 {
+      margin: 8px 0;
+
+      font-family: "Bebas Neue",
+                   sans-serif;
+
+      font-size: 42px;
+
+      line-height: 1;
+    }
+
+    .login-box p {
+      color: #aaa;
+
+      line-height: 1.5;
+    }
+
+    .login-field {
+      display: block;
+
+      margin: 16px 0;
+    }
+
+    .login-field span {
+      display: block;
+
+      font-size: 13px;
+
+      font-weight: 700;
+
+      margin-bottom: 7px;
+    }
+
+    .login-field input {
+      width: 100%;
+
+      box-sizing: border-box;
+
+      padding: 14px;
+
+      border-radius: 10px;
+
+      border: 1px solid #333;
+
+      background: #181818;
+
+      color: #fff;
+
+      font-size: 16px;
+
+      outline: none;
+    }
+
+    .login-field input:focus {
+      border-color: #1677ff;
+    }
+
+    #loginButton {
+      width: 100%;
+
+      margin-top: 8px;
+    }
+
+    #loginError {
+      color: #ff6b6b;
+
+      min-height: 22px;
+
+      margin-top: 12px;
+
+      font-size: 14px;
+    }
+
+    #appContent {
+      display: none;
+    }
+
+    /* =====================================================
+       CABEÇALHO
+    ===================================================== */
+
+    .logout-button {
+      border: 1px solid #333;
+
+      background: #151515;
+
+      color: #fff;
+
+      border-radius: 8px;
+
+      padding: 8px 12px;
+
+      margin-right: 8px;
+
+      cursor: pointer;
+    }
+
+    .logout-button:hover {
+      background: #222;
+    }
+
+    .user-email {
+      font-size: 12px;
+
+      color: #999;
+
+      margin-right: 8px;
+    }
+
+    /* =====================================================
+       MODAL
+    ===================================================== */
+
+    .modal {
+      display: none;
+
+      position: fixed;
+
+      inset: 0;
+
+      z-index: 9000;
+
+      background: rgba(0,0,0,.78);
+
+      padding: 20px;
+
+      overflow-y: auto;
+    }
+
+    .modal.open {
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+    }
+
+    .modal-box {
+      width: min(720px, 100%);
+
+      max-height: 92vh;
+
+      overflow-y: auto;
+
+      background: #111;
+
+      border: 1px solid #333;
+
+      border-radius: 18px;
+
+      padding: 24px;
+
+      position: relative;
+
+      box-shadow:
+        0 30px 80px rgba(0,0,0,.7);
+    }
+
+    .modal-box .close {
+      position: absolute;
+
+      right: 15px;
+
+      top: 12px;
+
+      width: 38px;
+
+      height: 38px;
+
+      border-radius: 50%;
+
+      border: 1px solid #333;
+
+      background: #1b1b1b;
+
+      color: #fff;
+
+      font-size: 24px;
+
+      cursor: pointer;
+    }
+
+    .modal-head {
+      margin-bottom: 20px;
+
+      padding-right: 45px;
+    }
+
+    .modal-head h2 {
+      font-family: "Bebas Neue",
+                   sans-serif;
+
+      font-size: 38px;
+
+      margin: 5px 0;
+    }
+
+    /* =====================================================
+       FORMULÁRIO
+    ===================================================== */
+
+    .form-grid {
+      display: grid;
+
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+      gap: 14px;
+    }
+
+    .field {
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 7px;
+    }
+
+    .field.wide {
+      grid-column: 1 / -1;
+    }
+
+    .field span {
+      font-size: 13px;
+
+      font-weight: 700;
+
+      color: #ddd;
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+
+      box-sizing: border-box;
+
+      background: #181818;
+
+      border: 1px solid #333;
+
+      border-radius: 9px;
+
+      color: #fff;
+
+      padding: 12px;
+
+      font-family: inherit;
+
+      font-size: 15px;
+
+      outline: none;
+    }
+
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      border-color: #1677ff;
+    }
+
+    .field textarea {
+      resize: vertical;
+    }
+
+    .field small {
+      color: #888;
+
+      font-size: 11px;
+    }
+
+    /* =====================================================
+       PREVIEW
+    ===================================================== */
+
+    .preview-row {
+      display: flex;
+
+      align-items: center;
+
+      gap: 15px;
+
+      margin-top: 20px;
+
+      padding: 15px;
+
+      background: #181818;
+
+      border: 1px solid #292929;
+
+      border-radius: 12px;
+    }
+
+    .photo-preview {
+      width: 75px;
+
+      height: 100px;
+
+      flex-shrink: 0;
+
+      border-radius: 8px;
+
+      border: 1px solid #333;
+
+      background: #222;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      text-align: center;
+
+      color: #777;
+
+      font-size: 10px;
+
+      overflow: hidden;
+    }
+
+    .preview-row strong {
+      font-size: 18px;
+    }
+
+    .preview-row p {
+      color: #999;
+
+      margin: 5px 0 0;
+    }
+
+    /* =====================================================
+       BOTÕES
+    ===================================================== */
+
+    .form-actions {
+      display: flex;
+
+      justify-content: flex-end;
+
+      gap: 10px;
+
+      margin-top: 20px;
+    }
+
+    .primary,
+    .secondary {
+      border-radius: 9px;
+
+      padding: 12px 18px;
+
+      font-weight: 800;
+
+      cursor: pointer;
+
+      border: 1px solid transparent;
+    }
+
+    .primary {
+      background: #fff;
+
+      color: #000;
+    }
+
+    .primary:hover {
+      background: #ddd;
+    }
+
+    .secondary {
+      background: #1a1a1a;
+
+      color: #fff;
+
+      border-color: #333;
+    }
+
+    /* =====================================================
+       LISTA DE MCs
+    ===================================================== */
+
+    .mc-admin-list {
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 12px;
+    }
+
+    .mc-row {
+      display: grid;
+
+      grid-template-columns:
+        65px 1fr auto;
+
+      gap: 15px;
+
+      align-items: center;
+
+      background: #111;
+
+      border: 1px solid #292929;
+
+      border-radius: 12px;
+
+      padding: 12px;
+    }
+
+    .mc-avatar {
+      width: 65px;
+
+      height: 85px;
+
+      border-radius: 7px;
+
+      background: #222;
+
+      border: 1px solid #333;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      text-align: center;
+
+      color: #777;
+
+      font-size: 9px;
+
+      overflow: hidden;
+    }
+
+    .mc-row h3 {
+      margin: 0 0 5px;
+
+      font-size: 18px;
+    }
+
+    .mc-row p {
+      margin: 0 0 8px;
+
+      color: #999;
+
+      font-size: 12px;
+    }
+
+    .mc-stats {
+      display: flex;
+
+      flex-wrap: wrap;
+
+      gap: 6px;
+    }
+
+    .mc-stats span {
+      font-size: 10px;
+
+      padding: 4px 6px;
+
+      border-radius: 5px;
+
+      background: #1e1e1e;
+
+      color: #bbb;
+    }
+
+    .row-actions {
+      display: flex;
+
+      gap: 6px;
+
+      align-items: center;
+    }
+
+    .icon-btn {
+      border: 1px solid #333;
+
+      background: #181818;
+
+      color: #fff;
+
+      border-radius: 7px;
+
+      padding: 8px;
+
+      cursor: pointer;
+
+      font-size: 11px;
+    }
+
+    .icon-btn.delete {
+      color: #ff6b6b;
+    }
+
+    /* =====================================================
+       RANKING
+    ===================================================== */
+
+    .full-ranking {
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 8px;
+    }
+
+    .full-rank {
+      display: grid;
+
+      grid-template-columns:
+        55px 1fr repeat(4, 80px);
+
+      gap: 10px;
+
+      align-items: center;
+
+      padding: 13px;
+
+      border: 1px solid #292929;
+
+      border-radius: 10px;
+
+      background: #111;
+    }
+
+    .full-rank .position {
+      font-family: "Bebas Neue",
+                   sans-serif;
+
+      font-size: 24px;
+    }
+
+    .full-rank strong {
+      display: block;
+    }
+
+    .full-rank small {
+      color: #777;
+
+      font-size: 9px;
+    }
+
+    /* =====================================================
+       MINI RANKING
+    ===================================================== */
+
+    .mini-ranking {
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 7px;
+    }
+
+    .mini-rank {
+      display: grid;
+
+      grid-template-columns: 35px 1fr auto;
+
+      align-items: center;
+
+      gap: 10px;
+
+      padding: 9px;
+
+      background: #171717;
+
+      border-radius: 7px;
+    }
+
+    .mini-rank span {
+      color: #aaa;
+
+      font-size: 12px;
+    }
+
+    /* =====================================================
+       EMPTY / COMING
+    ===================================================== */
+
+    .empty,
+    .coming {
+      text-align: center;
+
+      padding: 50px 20px;
+
+      color: #888;
+    }
+
+    .empty div,
+    .coming span {
+      font-size: 45px;
+    }
+
+    .coming h2 {
+      color: #fff;
+
+      font-family: "Bebas Neue",
+                   sans-serif;
+
+      font-size: 30px;
+    }
+
+    /* =====================================================
+       TOAST
+    ===================================================== */
+
+    .toast {
+      position: fixed;
+
+      left: 50%;
+
+      bottom: 25px;
+
+      transform:
+        translate(-50%, 30px);
+
+      background: #fff;
+
+      color: #000;
+
+      padding: 12px 18px;
+
+      border-radius: 8px;
+
+      font-size: 13px;
+
+      font-weight: 700;
+
+      opacity: 0;
+
+      pointer-events: none;
+
+      transition: .25s;
+
+      z-index: 99999;
+    }
+
+    .toast.show {
+      opacity: 1;
+
+      transform:
+        translate(-50%, 0);
+    }
+
+    /* =====================================================
+       RESPONSIVO
+    ===================================================== */
+
+    @media (max-width: 760px) {
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .field.wide {
+        grid-column: auto;
+      }
+
+      .mc-row {
+        grid-template-columns:
+          58px 1fr;
+      }
+
+      .mc-avatar {
+        width: 58px;
+
+        height: 76px;
+      }
+
+      .row-actions {
+        grid-column: 1 / -1;
+
+        justify-content: flex-end;
+      }
+
+      .full-rank {
+        grid-template-columns:
+          40px 1fr 65px;
+      }
+
+      .full-rank > div:nth-child(n+4) {
+        display: none;
+      }
+
+      .header-actions .user-email {
+        display: none;
+      }
+
+      .modal-box {
+        padding: 18px;
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .form-actions button {
+        width: 100%;
+      }
+
+      .preview-row {
+        align-items: flex-start;
+      }
+    }
+
+  </style>
 </head>
+
 <body>
-  <div class="noise"></div>
 
-  <header class="admin-header">
-    <a href="index.html" class="brand">
-      <span class="wolf">🐺</span>
-      <span><strong>BATALHA DA ALCATÉIA</strong><small>PAINEL ADMINISTRATIVO</small></span>
-    </a>
-    <div class="header-actions">
-      <a href="index.html" class="view-site">VER SITE ↗</a>
-      <button id="menuButton" class="menu-button">☰</button>
-    </div>
-  </header>
+  <!-- =====================================================
+       LOGIN
+  ===================================================== -->
 
-  <div class="layout">
-    <aside class="sidebar" id="sidebar">
-      <div class="side-label">ADMINISTRAÇÃO</div>
-      <button class="side-link active" data-view="dashboard">▦ <span>Dashboard</span></button>
-      <button class="side-link" data-view="mcs">🎤 <span>MCs</span></button>
-      <button class="side-link" data-view="ranking">🏆 <span>Ranking</span></button>
-      <button class="side-link" data-view="batalhas">⚡ <span>Batalhas</span></button>
-      <button class="side-link" data-view="eventos">📅 <span>Eventos</span></button>
-      <button class="side-link" data-view="curiosidades">⭐ <span>Curiosidades</span></button>
-      <button class="side-link" data-view="parceiros">🤝 <span>Parceiros</span></button>
-      <button class="side-link" data-view="pix">💰 <span>PIX</span></button>
-    </aside>
+  <div id="loginScreen">
 
-    <main class="main">
-      <section class="view active" id="dashboardView">
-        <div class="page-head">
-          <div><span class="eyebrow blue">PAINEL OFICIAL</span><h1>DASHBOARD</h1><p>Controle rápido da Batalha da Alcatéia.</p></div>
-          <button class="primary" id="newMcFromDash">+ NOVO MC</button>
-        </div>
-        <div class="dashboard-grid">
-          <div class="metric red"><span>MCs CADASTRADOS</span><strong id="metricMcs">0</strong></div>
-          <div class="metric blue"><span>PONTOS REGISTRADOS</span><strong id="metricPoints">0</strong></div>
-          <div class="metric gold"><span>TÍTULOS</span><strong id="metricTitles">0</strong></div>
-          <div class="metric green"><span>TWO LALAS</span><strong id="metricTwolalas">0</strong></div>
-        </div>
-        <div class="dashboard-columns">
-          <div class="panel">
-            <div class="panel-head"><h2>RANKING ATUAL</h2><button class="text-btn" data-view-link="mcs">VER MCs →</button></div>
-            <div id="dashRanking" class="mini-ranking"></div>
-          </div>
-          <div class="panel quick-actions">
-            <h2>AÇÕES RÁPIDAS</h2>
-            <button class="quick" id="quickNewMc">🎤 CADASTRAR NOVO MC</button>
-            <button class="quick" id="quickExport">💾 EXPORTAR DADOS</button>
-            <button class="quick" id="quickImport">📥 IMPORTAR DADOS</button>
-            <input type="file" id="importFile" accept=".json" hidden>
-            <button class="quick" id="quickReset">↺ RESTAURAR DADOS DEMO</button>
-          </div>
-        </div>
-      </section>
+    <div class="login-box">
 
-      <section class="view" id="mcsView">
-        <div class="page-head">
-          <div><span class="eyebrow red">BANCO DE DADOS</span><h1>MCs DA ALCATÉIA</h1><p>Cadastre e edite os competidores.</p></div>
-          <button class="primary" id="newMcButton">+ NOVO MC</button>
-        </div>
+      <div class="eyebrow red">
+        ÁREA RESTRITA
+      </div>
 
-        <div class="toolbar">
-          <div class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="Buscar MC por nome ou Instagram..."></div>
-          <select id="sortSelect">
-            <option value="pontos">Maior pontuação</option>
-            <option value="nome">Nome A–Z</option>
-            <option value="titulos">Mais títulos</option>
-            <option value="twolalas">Mais Twolalas</option>
-            <option value="participacoes">Mais participações</option>
-          </select>
-        </div>
+      <h1>
+        BATALHA DA ALCATÉIA
+      </h1>
 
-        <div id="mcAdminList" class="mc-admin-list"></div>
-        <div id="emptyState" class="empty" hidden>
-          <div>🐺</div><h2>NENHUM MC ENCONTRADO</h2><p>Cadastre o primeiro MC ou altere sua busca.</p>
-        </div>
-      </section>
+      <p>
+        Entre com o e-mail e a senha
+        do administrador.
+      </p>
 
-      <section class="view" id="rankingView">
-        <div class="page-head"><div><span class="eyebrow blue">CLASSIFICAÇÃO</span><h1>RANKING</h1><p>Prévia do ranking calculado a partir dos cadastros.</p></div></div>
-        <div class="panel"><div id="fullRanking" class="full-ranking"></div></div>
-      </section>
+      <form id="loginForm">
 
-      <section class="view" id="batalhasView">
-        <div class="page-head"><div><span class="eyebrow red">RESULTADOS</span><h1>BATALHAS</h1><p>O registro de resultados será conectado ao ranking na próxima etapa.</p></div></div>
-        <div class="coming"><span>⚡</span><h2>REGISTRO DE BATALHAS</h2><p>Aqui vamos cadastrar fase, adversário, placar, vitória 2×0, semifinal e título. O sistema calculará os pontos automaticamente.</p></div>
-      </section>
+        <label class="login-field">
 
-      <section class="view" id="eventosView">
-        <div class="page-head"><div><span class="eyebrow blue">AGENDA</span><h1>EVENTOS</h1><p>Gerencie a próxima batalha e os eventos futuros.</p></div></div>
-        <div class="coming"><span>📅</span><h2>GERENCIADOR DE EVENTOS</h2><p>Este módulo será ligado ao site público depois do banco de dados.</p></div>
-      </section>
+          <span>
+            E-MAIL
+          </span>
 
-      <section class="view" id="curiosidadesView">
-        <div class="page-head"><div><span class="eyebrow red">DESTAQUES</span><h1>CURIOSIDADES</h1><p>Rei da Alcatéia, Rei do Twolala, Destaque do Ano e outros.</p></div></div>
-        <div class="coming"><span>⭐</span><h2>CURIOSIDADES</h2><p>Os campeões automáticos serão calculados a partir dos dados dos MCs.</p></div>
-      </section>
+          <input
+            id="loginEmail"
+            type="email"
+            autocomplete="email"
+            required
+            placeholder="Seu e-mail">
 
-      <section class="view" id="parceirosView">
-        <div class="page-head"><div><span class="eyebrow blue">APOIO</span><h1>PARCEIROS</h1><p>Cadastre as marcas e pessoas que fortalecem o projeto.</p></div></div>
-        <div class="coming"><span>🤝</span><h2>PARCEIROS</h2><p>O cadastro de parceiros será incluído no próximo módulo.</p></div>
-      </section>
+        </label>
 
-      <section class="view" id="pixView">
-        <div class="page-head"><div><span class="eyebrow red">APOIO</span><h1>CHAVE PIX</h1><p>Configure a chave exibida no site oficial.</p></div></div>
-        <div class="coming"><span>💰</span><h2>CHAVE PIX</h2><p>O editor da chave PIX será incluído junto com as configurações gerais.</p></div>
-      </section>
-    </main>
-  </div>
+        <label class="login-field">
 
-  <div class="modal" id="mcModal" aria-hidden="true">
-    <div class="modal-box">
-      <button class="close" id="closeModal">×</button>
-      <div class="modal-head"><span class="eyebrow red" id="modalEyebrow">CADASTRO</span><h2 id="modalTitle">NOVO MC</h2></div>
-      <form id="mcForm">
-        <input type="hidden" id="mcId">
-        <div class="form-grid">
-          <label class="field wide"><span>Nome artístico *</span><input id="mcNome" required maxlength="60" placeholder="Ex.: Erick Martinss"></label>
-          <label class="field"><span>Instagram</span><input id="mcInstagram" placeholder="@usuario ou https://instagram.com/usuario"></label>
-          <label class="field"><span>Chave PIX</span><input id="mcPix" placeholder="Chave PIX do MC"></label>
-          <label class="field"><span>Participações</span><input id="mcParticipacoes" type="number" min="0" value="0"></label>
-          <label class="field"><span>Títulos</span><input id="mcTitulos" type="number" min="0" value="0"></label>
-          <label class="field"><span>Derrotas</span><input id="mcDerrotas" type="number" min="0" value="0"></label>
-          <label class="field"><span>Twolalas</span><input id="mcTwolalas" type="number" min="0" value="0"></label>
-          <label class="field"><span>Pontos</span><input id="mcPontos" type="number" min="0" value="0"></label>
-          <label class="field wide"><span>Biografia</span><textarea id="mcBio" rows="4" maxlength="1000" placeholder="Biografia oficial do MC..."></textarea></label>
-          <label class="field wide"><span>Melhor rima</span><textarea id="mcRima" rows="3" maxlength="600" placeholder="Registre aqui a melhor rima do MC..."></textarea></label>
-          <label class="field wide"><span>Foto do MC</span><input id="mcFoto" type="file" accept="image/*"><small>Na versão local, a foto fica salva no navegador. Para o banco online, enviaremos a imagem para armazenamento.</small></label>
-        </div>
-        <div class="preview-row">
-          <div class="photo-preview" id="photoPreview">FOTO<br>DO MC</div>
-          <div><strong id="previewName">NOME DO MC</strong><p id="previewMeta">0 pontos • 0 títulos • 0 Twolalas</p></div>
-        </div>
-        <div class="form-actions">
-          <button type="button" class="secondary" id="cancelForm">CANCELAR</button>
-          <button type="submit" class="primary">SALVAR MC</button>
-        </div>
+          <span>
+            SENHA
+          </span>
+
+          <input
+            id="loginPassword"
+            type="password"
+            autocomplete="current-password"
+            required
+            placeholder="Sua senha">
+
+        </label>
+
+        <button
+          id="loginButton"
+          class="primary"
+          type="submit">
+
+          ENTRAR NO PAINEL
+
+        </button>
+
+        <div id="loginError"></div>
+
       </form>
+
     </div>
+
   </div>
 
-  <div class="toast" id="toast"></div>
-  <script src="admin.js"></script>
+
+  <!-- =====================================================
+       APLICAÇÃO
+  ===================================================== -->
+
+  <div id="appContent">
+
+    <div class="noise"></div>
+
+
+    <!-- ===================================================
+         HEADER
+    =================================================== -->
+
+    <header class="admin-header">
+
+      <a
+        href="index.html"
+        class="brand">
+
+        <span class="wolf">
+          🐺
+        </span>
+
+        <span>
+
+          <strong>
+            BATALHA DA ALCATÉIA
+          </strong>
+
+          <small>
+            PAINEL ADMINISTRATIVO
+          </small>
+
+        </span>
+
+      </a>
+
+
+      <div class="header-actions">
+
+        <span
+          class="user-email"
+          id="userEmail">
+        </span>
+
+        <button
+          id="logoutButton"
+          class="logout-button">
+
+          SAIR
+
+        </button>
+
+        <a
+          href="index.html"
+          class="view-site">
+
+          VER SITE ↗
+
+        </a>
+
+        <button
+          id="menuButton"
+          class="menu-button">
+
+          ☰
+
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <!-- ===================================================
+         LAYOUT
+    =================================================== -->
+
+    <div class="layout">
+
+
+      <!-- ================================================
+           MENU
+      ================================================= -->
+
+      <aside
+        class="sidebar"
+        id="sidebar">
+
+        <div class="side-label">
+          ADMINISTRAÇÃO
+        </div>
+
+
+        <button
+          class="side-link active"
+          data-view="dashboard">
+
+          ▦
+
+          <span>
+            Dashboard
+          </span>
+
+        </button>
+
+
+        <button
+          class="side-link"
+          data-view="mcs">
+
+          🎤
+
+          <span>
+            MCs
+          </span>
+
+        </button>
+
+
+        <button
+          class="side-link"
+          data-view="ranking">
+
+          🏆
+
+          <span>
+            Ranking
+          </span>
+
+        </button>
+
+
+        <button
+          class="side-link"
+          data-view="batalhas">
+
+          ⚡
+
+          <span>
+            Batalhas
+          </span>
+
+        </button>
+
+
+        <button
+          class="side-link"
+          data-view="eventos">
+
+          📅
+
+          <span>
+            Eventos
+          </span>
+
+        </button>
+
+
+        <button
+          class="side-link"
+          data-view="curiosidades">
+
+          ⭐
+
+          <span>
+            Curiosidades
+          </span>
+
+        </button>
+
+
+        <button
+          class="side-link"
+          data-view="parceiros">
+
+          🤝
+
+          <span>
+            Parceiros
+          </span>
+
+        </button>
+
+
+        <button
+          class="side-link"
+          data-view="pix">
+
+          💰
+
+          <span>
+            PIX
+          </span>
+
+        </button>
+
+      </aside>
+
+
+      <!-- ================================================
+           CONTEÚDO
+      ================================================= -->
+
+      <main class="main">
+
+
+        <!-- ==============================================
+             DASHBOARD
+        =============================================== -->
+
+        <section
+          class="view active"
+          id="dashboardView">
+
+          <div class="page-head">
+
+            <div>
+
+              <span class="eyebrow blue">
+                PAINEL OFICIAL
+              </span>
+
+              <h1>
+                DASHBOARD
+              </h1>
+
+              <p>
+                Controle rápido da
+                Batalha da Alcatéia.
+              </p>
+
+            </div>
+
+
+            <button
+              class="primary"
+              id="newMcFromDash">
+
+              + NOVO MC
+
+            </button>
+
+          </div>
+
+
+          <div class="dashboard-grid">
+
+            <div class="metric red">
+
+              <span>
+                MCs CADASTRADOS
+              </span>
+
+              <strong id="metricMcs">
+                0
+              </strong>
+
+            </div>
+
+
+            <div class="metric blue">
+
+              <span>
+                PONTOS REGISTRADOS
+              </span>
+
+              <strong id="metricPoints">
+                0
+              </strong>
+
+            </div>
+
+
+            <div class="metric gold">
+
+              <span>
+                TÍTULOS
+              </span>
+
+              <strong id="metricTitles">
+                0
+              </strong>
+
+            </div>
+
+
+            <div class="metric green">
+
+              <span>
+                TWO LALAS
+              </span>
+
+              <strong id="metricTwolalas">
+                0
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div class="dashboard-columns">
+
+
+            <div class="panel">
+
+              <div class="panel-head">
+
+                <h2>
+                  RANKING ATUAL
+                </h2>
+
+                <button
+                  class="text-btn"
+                  data-view-link="mcs">
+
+                  VER MCs →
+
+                </button>
+
+              </div>
+
+              <div
+                id="dashRanking"
+                class="mini-ranking">
+              </div>
+
+            </div>
+
+
+            <div class="panel quick-actions">
+
+              <h2>
+                AÇÕES RÁPIDAS
+              </h2>
+
+
+              <button
+                class="quick"
+                id="quickNewMc">
+
+                🎤 CADASTRAR NOVO MC
+
+              </button>
+
+
+              <button
+                class="quick"
+                id="quickExport">
+
+                💾 EXPORTAR DADOS
+
+              </button>
+
+
+              <button
+                class="quick"
+                id="quickImport">
+
+                📥 IMPORTAR DADOS
+
+              </button>
+
+
+              <input
+                type="file"
+                id="importFile"
+                accept=".json"
+                hidden>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ==============================================
+             MCs
+        =============================================== -->
+
+        <section
+          class="view"
+          id="mcsView">
+
+          <div class="page-head">
+
+            <div>
+
+              <span class="eyebrow red">
+                BANCO DE DADOS
+              </span>
+
+              <h1>
+                MCs DA ALCATÉIA
+              </h1>
+
+              <p>
+                Cadastre e edite os competidores.
+              </p>
+
+            </div>
+
+
+            <button
+              class="primary"
+              id="newMcButton">
+
+              + NOVO MC
+
+            </button>
+
+          </div>
+
+
+          <div class="toolbar">
+
+            <div class="search-box">
+
+              <span>
+                ⌕
+              </span>
+
+              <input
+                id="searchInput"
+                type="search"
+                placeholder="Buscar MC por nome ou Instagram...">
+
+            </div>
+
+
+            <select id="sortSelect">
+
+              <option value="pontos">
+                Maior pontuação
+              </option>
+
+              <option value="nome">
+                Nome A–Z
+              </option>
+
+              <option value="titulos">
+                Mais títulos
+              </option>
+
+              <option value="twolalas">
+                Mais Twolalas
+              </option>
+
+              <option value="participacoes">
+                Mais participações
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div
+            id="mcAdminList"
+            class="mc-admin-list">
+          </div>
+
+
+          <div
+            id="emptyState"
+            class="empty"
+            hidden>
+
+            <div>
+              🐺
+            </div>
+
+            <h2>
+              NENHUM MC ENCONTRADO
+            </h2>
+
+            <p>
+              Cadastre o primeiro MC
+              ou altere sua busca.
+            </p>
+
+          </div>
+
+        </section>
+
+
+        <!-- ==============================================
+             RANKING
+        =============================================== -->
+
+        <section
+          class="view"
+          id="rankingView">
+
+          <div class="page-head">
+
+            <div>
+
+              <span class="eyebrow blue">
+                CLASSIFICAÇÃO
+              </span>
+
+              <h1>
+                RANKING
+              </h1>
+
+              <p>
+                Ranking calculado diretamente
+                do banco de dados.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="panel">
+
+            <div
+              id="fullRanking"
+              class="full-ranking">
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ==============================================
+             BATALHAS
+        =============================================== -->
+
+        <section
+          class="view"
+          id="batalhasView">
+
+          <div class="page-head">
+
+            <div>
+
+              <span class="eyebrow red">
+                RESULTADOS
+              </span>
+
+              <h1>
+                BATALHAS
+              </h1>
+
+              <p>
+                Registro de resultados.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="coming">
+
+            <span>
+              ⚡
+            </span>
+
+            <h2>
+              REGISTRO DE BATALHAS
+            </h2>
+
+            <p>
+              A próxima etapa vai cadastrar
+              fases, adversários, placares
+              e pontuação automática.
+            </p>
+
+          </div>
+
+        </section>
+
+
+        <!-- ==============================================
+             EVENTOS
+        =============================================== -->
+
+        <section
+          class="view"
+          id="eventosView">
+
+          <div class="page-head">
+
+            <div>
+
+              <span class="eyebrow blue">
+                AGENDA
+              </span>
+
+              <h1>
+                EVENTOS
+              </h1>
+
+              <p>
+                Gerencie a próxima batalha
+                e os eventos futuros.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="coming">
+
+            <span>
+              📅
+            </span>
+
+            <h2>
+              GERENCIADOR DE EVENTOS
+            </h2>
+
+            <p>
+              Será conectado ao site público
+              na próxima etapa.
+            </p>
+
+          </div>
+
+        </section>
+
+
+        <!-- ==============================================
+             CURIOSIDADES
+        =============================================== -->
+
+        <section
+          class="view"
+          id="curiosidadesView">
+
+          <div class="page-head">
+
+            <div>
+
+              <span class="eyebrow red">
+                DESTAQUES
+              </span>
+
+              <h1>
+                CURIOSIDADES
+              </h1>
+
+              <p>
+                Rei da Alcatéia, Rei do Twolala,
+                Destaque do Ano e outros.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="coming">
+
+            <span>
+              ⭐
+            </span>
+
+            <h2>
+              CURIOSIDADES
+            </h2>
+
+            <p>
+              Será conectado aos dados
+              dos MCs.
+            </p>
+
+          </div>
+
+        </section>
+
+
+        <!-- ==============================================
+             PARCEIROS
+        =============================================== -->
+
+        <section
+          class="view"
+          id="parceirosView">
+
+          <div class="page-head">
+
+            <div>
+
+              <span class="eyebrow blue">
+                APOIO
+              </span>
+
+              <h1>
+                PARCEIROS
+              </h1>
+
+              <p>
+                Gerencie os parceiros do projeto.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="coming">
+
+            <span>
+              🤝
+            </span>
+
+            <h2>
+              PARCEIROS
+            </h2>
+
+            <p>
+              Será conectado ao banco
+              na próxima etapa.
+            </p>
+
+          </div>
+
+        </section>
+
+
+        <!-- ==============================================
+             PIX
+        =============================================== -->
+
+        <section
+          class="view"
+          id="pixView">
+
+          <div class="page-head">
+
+            <div>
+
+              <span class="eyebrow red">
+                APOIO
+              </span>
+
+              <h1>
+                CHAVE PIX
+              </h1>
+
+              <p>
+                Configure a chave exibida
+                no site oficial.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="coming">
+
+            <span>
+              💰
+            </span>
+
+            <h2>
+              CHAVE PIX
+            </h2>
+
+            <p>
+              Será conectado às configurações
+              do site.
+            </p>
+
+          </div>
+
+        </section>
+
+      </main>
+
+    </div>
+
+
+    <!-- ===================================================
+         MODAL MC
+    =================================================== -->
+
+    <div
+      class="modal"
+      id="mcModal"
+      aria-hidden="true">
+
+
+      <div class="modal-box">
+
+
+        <button
+          class="close"
+          id="closeModal">
+
+          ×
+
+        </button>
+
+
+        <div class="modal-head">
+
+          <span
+            class="eyebrow red"
+            id="modalEyebrow">
+
+            CADASTRO
+
+          </span>
+
+
+          <h2 id="modalTitle">
+
+            NOVO MC
+
+          </h2>
+
+        </div>
+
+
+        <form id="mcForm">
+
+
+          <input
+            type="hidden"
+            id="mcId">
+
+
+          <div class="form-grid">
+
+
+            <!-- NOME -->
+
+            <label class="field wide">
+
+              <span>
+                Nome artístico *
+              </span>
+
+              <input
+                id="mcNome"
+                required
+                maxlength="60"
+                placeholder="Ex.: Erick Martinss">
+
+            </label>
+
+
+            <!-- INSTAGRAM -->
+
+            <label class="field">
+
+              <span>
+                Instagram
+              </span>
+
+              <input
+                id="mcInstagram"
+                placeholder="@usuario">
+
+            </label>
+
+
+            <!-- PIX -->
+
+            <label class="field">
+
+              <span>
+                Chave PIX
+              </span>
+
+              <input
+                id="mcPix"
+                placeholder="Chave PIX do MC">
+
+            </label>
+
+
+            <!-- PARTICIPAÇÕES -->
+
+            <label class="field">
+
+              <span>
+                Participações
+              </span>
+
+              <input
+                id="mcParticipacoes"
+                type="number"
+                min="0"
+                value="0">
+
+            </label>
+
+
+            <!-- TÍTULOS -->
+
+            <label class="field">
+
+              <span>
+                Títulos
+              </span>
+
+              <input
+                id="mcTitulos"
+                type="number"
+                min="0"
+                value="0">
+
+            </label>
+
+
+            <!-- DERROTAS -->
+
+            <label class="field">
+
+              <span>
+                Derrotas
+              </span>
+
+              <input
+                id="mcDerrotas"
+                type="number"
+                min="0"
+                value="0">
+
+            </label>
+
+
+            <!-- TWOLALAS -->
+
+            <label class="field">
+
+              <span>
+                Twolalas
+              </span>
+
+              <input
+                id="mcTwolalas"
+                type="number"
+                min="0"
+                value="0">
+
+            </label>
+
+
+            <!-- PONTOS -->
+
+            <label class="field">
+
+              <span>
+                Pontos
+              </span>
+
+              <input
+                id="mcPontos"
+                type="number"
+                min="0"
+                value="0">
+
+            </label>
+
+
+            <!-- BIO -->
+
+            <label class="field wide">
+
+              <span>
+                Biografia
+              </span>
+
+              <textarea
+                id="mcBio"
+                rows="4"
+                maxlength="1000">
+              </textarea>
+
+            </label>
+
+
+            <!-- MELHOR RIMA -->
+
+            <label class="field wide">
+
+              <span>
+                Melhor rima
+              </span>
+
+              <textarea
+                id="mcRima"
+                rows="3"
+                maxlength="600">
+              </textarea>
+
+            </label>
+
+
+            <!-- FOTO -->
+
+            <label class="field wide">
+
+              <span>
+                Foto do MC
+              </span>
+
+              <input
+                id="mcFoto"
+                type="file"
+                accept="image/*">
+
+              <small>
+                Use uma foto de até 2 MB.
+              </small>
+
+            </label>
+
+          </div>
+
+
+          <!-- PREVIEW -->
+
+          <div class="preview-row">
+
+
+            <div
+              class="photo-preview"
+              id="photoPreview">
+
+              FOTO
+              <br>
+              DO MC
+
+            </div>
+
+
+            <div>
+
+              <strong id="previewName">
+
+                NOME DO MC
+
+              </strong>
+
+
+              <p id="previewMeta">
+
+                0 pontos
+                •
+                0 títulos
+                •
+                0 Twolalas
+
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- BOTÕES -->
+
+          <div class="form-actions">
+
+
+            <button
+              type="button"
+              class="secondary"
+              id="cancelForm">
+
+              CANCELAR
+
+            </button>
+
+
+            <button
+              type="submit"
+              class="primary">
+
+              SALVAR MC
+
+            </button>
+
+          </div>
+
+
+        </form>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         TOAST
+    =================================================== -->
+
+    <div
+      class="toast"
+      id="toast">
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       SUPABASE
+  ===================================================== -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+  </script>
+
+
+  <!-- =====================================================
+       CONFIGURAÇÃO DO SUPABASE
+  ===================================================== -->
+
+  <script>
+
+    const SUPABASE_URL =
+      "https://xrvefgqycejiuokdmfio.supabase.co";
+
+    const SUPABASE_PUBLISHABLE_KEY =
+      "sb_publishable_iCYF-r1R-VVcVHvlFJkxWg_R-urdYYA";
+
+  </script>
+
+
+  <!-- =====================================================
+       JAVASCRIPT DO PAINEL
+  ===================================================== -->
+
+  <script src="admin.js">
+  </script>
+
+
 </body>
 </html>
