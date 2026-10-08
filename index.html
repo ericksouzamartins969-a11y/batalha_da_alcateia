@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Batalha da Alcateia — Site Oficial</title>
+<meta name="description" content="Site oficial da Batalha da Alcateia — Parintins, Amazonas.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--red:#e21b2d;--blue:#1258d6;--ink:#0b0d12;--paper:#f6f7f9;--muted:#68707d;--line:#e5e7eb;--white:#fff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--paper);color:var(--ink)}
+a{text-decoration:none;color:inherit}.nav{position:sticky;top:0;z-index:50;background:#0b0d12;color:#fff;border-bottom:1px solid #222}.navin{max-width:1120px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:14px 18px}.brand{font-weight:900;letter-spacing:.5px}.brand b:first-child{color:var(--blue)}.brand b:last-child{color:var(--red)}.links{display:flex;gap:15px;font-size:13px;font-weight:800;flex-wrap:wrap}.links a:hover{opacity:.75}
+.hero{background:#0b0d12;color:#fff}.hero-in{max-width:1120px;margin:auto;padding:68px 18px 58px}.tag{display:inline-block;border:1px solid #444;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:800}.hero h1{font-size:clamp(44px,9vw,88px);line-height:.88;margin:20px 0 18px;text-transform:uppercase;letter-spacing:-4px}.hero h1 span:first-child{color:var(--blue)}.hero h1 span:last-child{color:var(--red)}.hero p{max-width:650px;color:#cbd0d9;font-size:18px;line-height:1.5}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:25px}.btn{border:0;cursor:pointer;padding:12px 17px;border-radius:10px;font-weight:900;display:inline-block}.btn.primary{background:#fff;color:#111}.btn.red{background:var(--red);color:#fff}.btn.blue{background:var(--blue);color:#fff}.btn.dark{background:#111827;color:#fff}
+.wrap{max-width:1120px;margin:auto;padding:52px 18px}.section-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:20px}.eyebrow{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue)}h2{font-size:32px;margin:6px 0 0}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 5px 20px #00000008}.card h3{margin:0 0 8px}.muted{color:var(--muted)}.rank{display:flex;align-items:center;gap:14px}.pos{font-size:28px;font-weight:900;width:42px}.avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--red));display:grid;place-items:center;color:#fff;font-weight:900;overflow:hidden;flex:none}.avatar img{width:100%;height:100%;object-fit:cover}.pts{margin-left:auto;font-weight:900}.event{border-left:5px solid var(--red)}.event .date{font-size:12px;font-weight:900;color:var(--red);text-transform:uppercase}.gallery{grid-template-columns:repeat(4,1fr)}.photo{aspect-ratio:1;background:#111827;border-radius:14px;overflow:hidden;position:relative}.photo img{width:100%;height:100%;object-fit:cover}.photo span{position:absolute;left:10px;right:10px;bottom:10px;color:#fff;font-weight:900;text-shadow:0 2px 6px #000}
+.admin{background:#0b0d12;color:#fff;border-radius:20px;padding:28px}.admin .eyebrow{color:#6ea0ff}.panel{display:none;background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;margin-top:16px}.panel.show{display:block}.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:12px;font-weight:900}.field input,.field textarea,.field select{width:100%;border:1px solid #d7dce4;border-radius:10px;padding:11px 12px;font:inherit;background:#fff}.field textarea{min-height:90px;resize:vertical}.field small{color:var(--muted)}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.list{display:grid;gap:10px;margin-top:15px}.listitem{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:10px}.danger{color:#b42318}.notice{padding:12px;border-radius:10px;background:#f3f4f6;margin:10px 0}.success{background:#ecfdf3;color:#166534}.error{background:#fef2f2;color:#991b1b}.highlight{border-top:5px solid var(--blue)}.highlight b{display:block;font-size:14px}.highlight .value{font-size:20px;font-weight:900;margin:8px 0}.partner{border-left:5px solid var(--blue)}.hidden{display:none!important}.footer{background:#0b0d12;color:#aeb4bf;padding:34px 18px}.footerin{max-width:1120px;margin:auto;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}.small{font-size:13px}
+.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:16px;z-index:100}.modal.show{display:flex}.modalbox{width:min(520px,100%);background:#fff;border-radius:18px;padding:22px;max-height:90vh;overflow:auto}.close{float:right;border:0;background:#eee;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:20px}.mobile{display:none}
+@media(max-width:760px){.links{display:none}.mobile{display:block}.hero-in{padding-top:52px}.hero h1{letter-spacing:-2px}.section-head{display:block}.wrap{padding:40px 16px}.grid,.gallery{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.listitem{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<nav class="nav"><div class="navin"><a class="brand" href="#inicio"><b>BATALHA</b> DA <b>ALCATEIA</b></a><div class="links"><a href="#ranking">Ranking</a><a href="#mcs">MCs</a><a href="#batalhas">Batalhas</a><a href="#eventos">Eventos</a><a href="#destaques">Destaques</a><a href="#galeria">Galeria</a><a href="#parcerias">Parcerias</a><a href="#admin">Admin</a></div><span class="mobile">☰</span></div></nav>
+
+<header id="inicio" class="hero"><div class="hero-in"><span class="tag">SITE OFICIAL • PARINTINS/AM</span><h1><span>Batalha</span><br><span>da Alcateia</span></h1><p>A arena de rimas de Parintins. MCs, rankings, confrontos, eventos e história em um só lugar.</p><div class="cta"><a class="btn primary" href="#ranking">Ver ranking</a><a class="btn red" href="#eventos">Próximos eventos</a></div></div></header>
+
+<section id="ranking" class="wrap"><div class="section-head"><div><div class="eyebrow">Classificação</div><h2>Ranking da Alcateia</h2></div><span class="muted">Pontuação automática</span></div><div id="rankingGrid" class="grid"><div class="notice">Carregando ranking...</div></div></section>
+<section id="mcs" class="wrap"><div class="section-head"><div><div class="eyebrow">Atletas da rima</div><h2>MCs</h2></div></div><div id="mcGrid" class="grid"><div class="notice">Carregando MCs...</div></div></section>
+<section id="batalhas" class="wrap"><div class="section-head"><div><div class="eyebrow">Histórico</div><h2>Últimas batalhas</h2></div></div><div id="battleGrid" class="grid"><div class="notice">Carregando batalhas...</div></div></section>
+<section id="eventos" class="wrap"><div class="section-head"><div><div class="eyebrow">Agenda</div><h2>Próximos eventos</h2></div></div><div id="eventGrid" class="grid"><div class="notice">Carregando eventos...</div></div></section>
+<section id="destaques" class="wrap"><div class="section-head"><div><div class="eyebrow">Reconhecimento</div><h2>Destaques da Alcateia</h2></div></div><div id="highlightGrid" class="grid"><div class="notice">Carregando destaques...</div></div></section>
+<section id="galeria" class="wrap"><div class="section-head"><div><div class="eyebrow">Memória</div><h2>Galeria</h2></div></div><div id="galleryGrid" class="grid gallery"><div class="notice">Carregando galeria...</div></div></section>
+<section id="parcerias" class="wrap"><div class="section-head"><div><div class="eyebrow">Apoie o movimento</div><h2>Parcerias</h2></div></div><div id="partnerGrid" class="grid"><div class="notice">Carregando contatos...</div></div></section>
+
+<section id="admin" class="wrap"><div class="admin"><div class="eyebrow">Área restrita</div><h2>Painel da organização</h2><p>Cadastre MCs, batalhas, eventos, destaques, contatos e fotos sem editar o código.</p><button id="loginBtn" class="btn red" onclick="openLogin()">Entrar no painel</button><button id="logoutBtn" class="btn dark hidden" onclick="logout()">Sair</button></div>
+<div id="adminPanel" class="panel">
+<h3>Painel administrativo</h3><div id="adminMsg"></div>
+<div class="card"><h3>Cadastrar evento</h3><div class="formgrid">
+<div class="field"><label>Nome do evento</label><input id="evName" placeholder="Batalha da Alcateia"></div>
+<div class="field"><label>Data</label><input id="evDate" type="date"></div>
+<div class="field"><label>Horário</label><input id="evTime" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="19:30"><small>Digite diretamente no formato HH:MM. Ex.: 19:30</small></div>
+<div class="field"><label>Local</label><input id="evLocation" placeholder="Praça dos Bois"></div>
+<div class="field"><label>Premiação</label><input id="evPrize" placeholder="R$ 50,00 + Folinha"></div>
+<div class="field full"><label>Descrição</label><textarea id="evDesc" placeholder="Informações do evento"></textarea></div>
+</div><div class="actions"><button class="btn blue" onclick="saveEvent()">Salvar evento</button></div></div>
+
+<div class="card"><h3>Cadastrar MC</h3><div class="formgrid">
+<div class="field"><label>Nome</label><input id="mcName"></div><div class="field"><label>Instagram</label><input id="mcInstagram" placeholder="@usuario"></div>
+<div class="field"><label>Cidade</label><input id="mcCity" value="Parintins"></div><div class="field"><label>Nota</label><input id="mcRating" type="number" min="0" max="10" step="0.1" value="0"></div>
+<div class="field full"><label>Bio</label><textarea id="mcBio"></textarea></div><div class="field full"><label>Foto</label><input id="mcPhoto" type="file" accept="image/*"></div>
+</div><div class="actions"><button class="btn blue" onclick="saveMC()">Salvar MC</button></div></div>
+
+<div class="card"><h3>Registrar batalha</h3><div class="formgrid">
+<div class="field"><label>MC 1</label><select id="bMc1"></select></div><div class="field"><label>MC 2</label><select id="bMc2"></select></div>
+<div class="field"><label>Vencedor</label><select id="bWinner"></select></div><div class="field"><label>Fase</label><select id="bPhase"><option>1ª fase</option><option>semifinal</option><option>final</option></select></div>
+<div class="field"><label>Data</label><input id="bDate" type="date"></div><div class="field"><label>Placar</label><input id="bScore" placeholder="2-0"></div>
+</div><div class="actions"><button class="btn blue" onclick="saveBattle()">Salvar batalha</button></div></div>
+
+<div class="card"><h3>Editar Destaques</h3><div id="highlightAdmin"></div></div>
+<div class="card"><h3>Contato para Parcerias</h3><div class="formgrid">
+<div class="field"><label>Nome/organização</label><input id="pOrg"></div><div class="field"><label>WhatsApp</label><input id="pWhatsapp" placeholder="5592..."></div>
+<div class="field"><label>Instagram</label><input id="pInstagram" placeholder="@batalhadaalcateia"></div><div class="field"><label>Chave PIX</label><input id="pPix"></div>
+<div class="field full"><label>Mensagem</label><textarea id="pMessage"></textarea></div>
+</div><div class="actions"><button class="btn blue" onclick="savePartner()">Salvar contato</button></div></div>
+
+<div class="card"><h3>Enviar foto para a galeria</h3><div class="formgrid"><div class="field"><label>Legenda</label><input id="photoCaption"></div><div class="field"><label>Arquivo</label><input id="photoFile" type="file" accept="image/*"></div></div><div class="actions"><button class="btn blue" onclick="savePhoto()">Enviar foto</button></div></div>
+<div class="card"><h3>Gerenciar dados</h3><div class="actions"><button class="btn dark" onclick="loadAdmin()">Atualizar listas</button></div><div id="adminLists"></div></div>
+</div></section>
+
+<footer class="footer"><div class="footerin"><div><b>BATALHA DA ALCATEIA</b><div class="small">Hip Hop • Freestyle • Parintins/AM</div></div><div class="small">Site oficial • Organização da Batalha da Alcateia</div></div></footer>
+
+<div id="loginModal" class="modal"><div class="modalbox"><button class="close" onclick="closeLogin()">×</button><h2>Login do administrador</h2><div class="field"><label>E-mail</label><input id="loginEmail" type="email" autocomplete="username"></div><div class="field" style="margin-top:10px"><label>Senha</label><input id="loginPassword" type="password" autocomplete="current-password"></div><div id="loginMsg"></div><div class="actions"><button class="btn red" onclick="login()">Entrar</button></div></div></div>
+
+<script>
+const SUPABASE_URL="https://phhltrrzofbmtufmpdab.supabase.co";
+const SUPABASE_KEY="sb_publishable_NiOLoIKHl1XogKjk02vt5A_SBjJ_HAA";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let currentMcs=[];
+
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
+function initials(n){return String(n||"?").trim().split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();}
+function fmtDate(d){if(!d)return "";const [y,m,day]=d.split("-");return `${day}/${m}/${y}`;}
+function normalizeTime(v){let s=String(v||"").trim().replace(/\D/g,"");if(s.length===3)s="0"+s;if(s.length!==4)return null;let h=+s.slice(0,2),m=+s.slice(2);if(h>23||m>59)return null;return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;}
+function showMsg(id,msg,ok=true){const e=document.getElementById(id);if(e)e.innerHTML=`<div class="notice ${ok?"success":"error"}">${esc(msg)}</div>`;}
+
+async function loadPublic(){
+ const r=await sb.from("ranking").select("*").order("points",{ascending:false});
+ const g=document.getElementById("rankingGrid"); if(r.error)g.innerHTML=`<div class="notice error">${esc(r.error.message)}</div>`; else g.innerHTML=r.data.length?r.data.map((x,i)=>`<div class="card rank"><div class="pos">${String(i+1).padStart(2,"0")}</div><div class="avatar">${x.photo_url?`<img src="${esc(x.photo_url)}">`:initials(x.name)}</div><div><b>${esc(x.name)}</b><div class="muted">${esc(x.city||"Parintins")}</div></div><div class="pts">${x.points||0} pts</div></div>`).join(""):`<div class="notice">Nenhum MC cadastrado.</div>`;
+
+ const m=await sb.from("mcs").select("*").order("name");
+ currentMcs=m.data||[];
+ document.getElementById("mcGrid").innerHTML=currentMcs.length?currentMcs.map(x=>`<div class="card"><div class="avatar">${x.photo_url?`<img src="${esc(x.photo_url)}">`:initials(x.name)}</div><h3>${esc(x.name)}</h3><p class="muted">${esc(x.bio||"Perfil oficial do competidor.")}</p><b>Nota: ${Number(x.rating||0).toFixed(1)}/10</b></div>`).join(""):`<div class="notice">Nenhum MC cadastrado.</div>`;
+
+ const b=await sb.from("battles").select("*,mc1:mcs!battles_mc1_id_fkey(name),mc2:mcs!battles_mc2_id_fkey(name),winner:mcs!battles_winner_id_fkey(name)").order("battle_date",{ascending:false});
+ document.getElementById("battleGrid").innerHTML=(b.data||[]).length?b.data.map(x=>`<div class="card"><h3>${esc(x.mc1?.name)} × ${esc(x.mc2?.name)}</h3><p class="muted">${esc(x.phase)} • ${fmtDate(x.battle_date)}</p><b>Vitória: ${esc(x.winner?.name)}${x.score?` • ${esc(x.score)}`:""}</b></div>`).join(""):`<div class="notice">Nenhuma batalha cadastrada.</div>`;
+
+ const e=await sb.from("events").select("*").order("event_date",{ascending:true});
+ document.getElementById("eventGrid").innerHTML=(e.data||[]).length?e.data.map(x=>`<div class="card event"><div class="date">${fmtDate(x.event_date)}${x.event_time?" • "+esc(String(x.event_time).slice(0,5)):""}</div><h3>${esc(x.name)}</h3><p>${esc(x.location||"")}</p><b>${esc(x.prize||"")}</b><p class="muted">${esc(x.description||"")}</p></div>`).join(""):`<div class="notice">Nenhum evento cadastrado.</div>`;
+
+ const h=await sb.from("highlights").select("*").order("category");
+ document.getElementById("highlightGrid").innerHTML=(h.data||[]).map(x=>`<div class="card highlight"><b>${esc(x.title)}</b><div class="value">${esc(x.description||"A definir")}</div></div>`).join("")||`<div class="notice">Nenhum destaque cadastrado.</div>`;
+
+ const p=await sb.from("photos").select("*").order("created_at",{ascending:false});
+ document.getElementById("galleryGrid").innerHTML=(p.data||[]).map(x=>`<div class="photo"><img src="${esc(x.image_url)}"><span>${esc(x.caption||"Batalha da Alcateia")}</span></div>`).join("")||`<div class="notice">Nenhuma foto publicada.</div>`;
+
+ const pr=await sb.from("partnership").select("*").limit(1).maybeSingle();
+ const pg=document.getElementById("partnerGrid");
+ if(pr.data){let w=String(pr.data.whatsapp||"").replace(/\D/g,"");pg.innerHTML=`<div class="card partner"><h3>${esc(pr.data.organization_name||"Batalha da Alcateia")}</h3><p>${esc(pr.data.message||"Entre em contato para propostas de parceria.")}</p><div class="actions">${w?`<a class="btn blue" target="_blank" href="https://wa.me/${w}">WhatsApp</a>`:""}${pr.data.instagram?`<a class="btn dark" target="_blank" href="https://instagram.com/${esc(String(pr.data.instagram).replace(/^@/,""))}">Instagram</a>`:""}</div>${pr.data.pix_key?`<p><b>Chave PIX:</b> ${esc(pr.data.pix_key)}</p>`:""}</div>`}else pg.innerHTML=`<div class="notice">Contato para parcerias em breve.</div>`;
+}
+async function login(){const email=document.getElementById("loginEmail").value.trim(),password=document.getElementById("loginPassword").value;const {error}=await sb.auth.signInWithPassword({email,password});if(error)showMsg("loginMsg",error.message,false);else{closeLogin();document.getElementById("loginBtn").classList.add("hidden");document.getElementById("logoutBtn").classList.remove("hidden");document.getElementById("adminPanel").classList.add("show");await loadAdmin();}}
+async function logout(){await sb.auth.signOut();document.getElementById("loginBtn").classList.remove("hidden");document.getElementById("logoutBtn").classList.add("hidden");document.getElementById("adminPanel").classList.remove("show");}
+function openLogin(){document.getElementById("loginModal").classList.add("show")}function closeLogin(){document.getElementById("loginModal").classList.remove("show")}
+function requireAuth(){return sb.auth.getUser().then(r=>{if(!r.data.user){openLogin();return false}return true})}
+
+async function saveEvent(){
+ if(!await requireAuth())return;
+ const time=normalizeTime(document.getElementById("evTime").value);
+ if(document.getElementById("evTime").value && !time){showMsg("adminMsg","Digite o horário no formato HH:MM, por exemplo 19:30.",false);return}
+ const payload={name:document.getElementById("evName").value.trim(),event_date:document.getElementById("evDate").value,event_time:time,location:document.getElementById("evLocation").value.trim(),prize:document.getElementById("evPrize").value.trim(),description:document.getElementById("evDesc").value.trim()};
+ const {error}=await sb.from("events").insert(payload);if(error)showMsg("adminMsg",error.message,false);else{showMsg("adminMsg","Evento salvo com sucesso!");["evName","evDate","evTime","evLocation","evPrize","evDesc"].forEach(id=>document.getElementById(id).value="");await loadPublic();}}
+async function saveMC(){
+ if(!await requireAuth())return;
+ const file=document.getElementById("mcPhoto").files[0];let url=null;
+ if(file){const path=`${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,"")}`;const up=await sb.storage.from("mc-photos").upload(path,file,{upsert:false});if(up.error){showMsg("adminMsg",up.error.message,false);return}url=sb.storage.from("mc-photos").getPublicUrl(path).data.publicUrl}
+ const {error}=await sb.from("mcs").insert({name:document.getElementById("mcName").value.trim(),instagram:document.getElementById("mcInstagram").value.trim(),bio:document.getElementById("mcBio").value.trim(),rating:+document.getElementById("mcRating").value||0,city:document.getElementById("mcCity").value.trim()||"Parintins",photo_url:url});
+ if(error)showMsg("adminMsg",error.message,false);else{showMsg("adminMsg","MC cadastrado com sucesso!");await loadPublic();await loadAdmin();}
+}
+async function saveBattle(){
+ if(!await requireAuth())return;
+ const p={mc1_id:document.getElementById("bMc1").value,mc2_id:document.getElementById("bMc2").value,winner_id:document.getElementById("bWinner").value,phase:document.getElementById("bPhase").value,battle_date:document.getElementById("bDate").value,score:document.getElementById("bScore").value.trim()};
+ const {error}=await sb.from("battles").insert(p);if(error)showMsg("adminMsg",error.message,false);else{showMsg("adminMsg","Batalha registrada e ranking atualizado!");await loadPublic();await loadAdmin();}
+}
+async function savePartner(){
+ if(!await requireAuth())return;
+ const payload={organization_name:document.getElementById("pOrg").value.trim(),whatsapp:document.getElementById("pWhatsapp").value.trim(),instagram:document.getElementById("pInstagram").value.trim(),pix_key:document.getElementById("pPix").value.trim(),message:document.getElementById("pMessage").value.trim()};
+ const old=await sb.from("partnership").select("id").limit(1).maybeSingle();let res;
+ if(old.data)res=await sb.from("partnership").update(payload).eq("id",old.data.id);else res=await sb.from("partnership").insert(payload);
+ if(res.error)showMsg("adminMsg",res.error.message,false);else{showMsg("adminMsg","Contato de parceria atualizado!");await loadPublic();await loadAdmin();}
+}
+async function savePhoto(){
+ if(!await requireAuth())return;
+ const file=document.getElementById("photoFile").files[0];if(!file){showMsg("adminMsg","Escolha uma foto.",false);return}
+ const path=`${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,"")}`;const up=await sb.storage.from("battle-photos").upload(path,file,{upsert:false});if(up.error){showMsg("adminMsg",up.error.message,false);return}
+ const url=sb.storage.from("battle-photos").getPublicUrl(path).data.publicUrl;const {error}=await sb.from("photos").insert({caption:document.getElementById("photoCaption").value.trim(),image_url:url,storage_path:path});if(error)showMsg("adminMsg",error.message,false);else{showMsg("adminMsg","Foto enviada!");document.getElementById("photoCaption").value="";document.getElementById("photoFile").value="";await loadPublic();await loadAdmin();}
+}
+async function loadAdmin(){
+ if(!await requireAuth())return;
+ const s=await sb.from("mcs").select("id,name").order("name");currentMcs=s.data||[];
+ ["bMc1","bMc2"].forEach(id=>document.getElementById(id).innerHTML=currentMcs.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join(""));
+ document.getElementById("bWinner").innerHTML=currentMcs.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("");
+ const h=await sb.from("highlights").select("*").order("category");
+ document.getElementById("highlightAdmin").innerHTML=(h.data||[]).map(x=>`<div class="card" style="margin-top:10px"><div class="field"><label>${esc(x.title)}</label><input id="hv_${x.id}" value="${esc(x.description||"")}"></div><div class="actions"><button class="btn blue" onclick="updateHighlight('${x.id}')">Salvar</button></div></div>`).join("");
+ const p=await sb.from("partnership").select("*").limit(1).maybeSingle();if(p.data){document.getElementById("pOrg").value=p.data.organization_name||"";document.getElementById("pWhatsapp").value=p.data.whatsapp||"";document.getElementById("pInstagram").value=p.data.instagram||"";document.getElementById("pPix").value=p.data.pix_key||"";document.getElementById("pMessage").value=p.data.message||"";}
+ const [m,b,e]=await Promise.all([sb.from("mcs").select("id,name").order("name"),sb.from("battles").select("id,score,battle_date").order("battle_date",{ascending:false}).limit(20),sb.from("events").select("id,name,event_date,event_time").order("event_date",{ascending:false}).limit(20)]);
+ document.getElementById("adminLists").innerHTML=`<p><b>${m.data?.length||0}</b> MCs cadastrados • <b>${b.data?.length||0}</b> batalhas recentes • <b>${e.data?.length||0}</b> eventos recentes.</p>`;
+}
+async function updateHighlight(id){if(!await requireAuth())return;const v=document.getElementById("hv_"+id).value;const {error}=await sb.from("highlights").update({description:v,updated_at:new Date().toISOString()}).eq("id",id);if(error)showMsg("adminMsg",error.message,false);else{showMsg("adminMsg","Destaque atualizado!");await loadPublic();}}
+document.getElementById("evTime").addEventListener("input",e=>{let v=e.target.value.replace(/\D/g,"").slice(0,4);if(v.length>=3)v=v.slice(0,2)+":"+v.slice(2);e.target.value=v;});
+sb.auth.getSession().then(r=>{if(r.data.session){document.getElementById("loginBtn").classList.add("hidden");document.getElementById("logoutBtn").classList.remove("hidden");document.getElementById("adminPanel").classList.add("show");loadAdmin();}});
+loadPublic();
+</script>
+</body>
+</html>
