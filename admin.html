@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090909">
+  <meta name="description" content="Painel administrativo da Batalha da Alcatéia">
+  <title>Admin | Batalha da Alcatéia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="noise"></div>
+
+  <header class="admin-header">
+    <a href="index.html" class="brand">
+      <span class="wolf">🐺</span>
+      <span><strong>BATALHA DA ALCATÉIA</strong><small>PAINEL ADMINISTRATIVO</small></span>
+    </a>
+    <div class="header-actions">
+      <a href="index.html" class="view-site">VER SITE ↗</a>
+      <button id="menuButton" class="menu-button">☰</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="side-label">ADMINISTRAÇÃO</div>
+      <button class="side-link active" data-view="dashboard">▦ <span>Dashboard</span></button>
+      <button class="side-link" data-view="mcs">🎤 <span>MCs</span></button>
+      <button class="side-link" data-view="ranking">🏆 <span>Ranking</span></button>
+      <button class="side-link" data-view="batalhas">⚡ <span>Batalhas</span></button>
+      <button class="side-link" data-view="eventos">📅 <span>Eventos</span></button>
+      <button class="side-link" data-view="curiosidades">⭐ <span>Curiosidades</span></button>
+      <button class="side-link" data-view="parceiros">🤝 <span>Parceiros</span></button>
+      <button class="side-link" data-view="pix">💰 <span>PIX</span></button>
+    </aside>
+
+    <main class="main">
+      <section class="view active" id="dashboardView">
+        <div class="page-head">
+          <div><span class="eyebrow blue">PAINEL OFICIAL</span><h1>DASHBOARD</h1><p>Controle rápido da Batalha da Alcatéia.</p></div>
+          <button class="primary" id="newMcFromDash">+ NOVO MC</button>
+        </div>
+        <div class="dashboard-grid">
+          <div class="metric red"><span>MCs CADASTRADOS</span><strong id="metricMcs">0</strong></div>
+          <div class="metric blue"><span>PONTOS REGISTRADOS</span><strong id="metricPoints">0</strong></div>
+          <div class="metric gold"><span>TÍTULOS</span><strong id="metricTitles">0</strong></div>
+          <div class="metric green"><span>TWO LALAS</span><strong id="metricTwolalas">0</strong></div>
+        </div>
+        <div class="dashboard-columns">
+          <div class="panel">
+            <div class="panel-head"><h2>RANKING ATUAL</h2><button class="text-btn" data-view-link="mcs">VER MCs →</button></div>
+            <div id="dashRanking" class="mini-ranking"></div>
+          </div>
+          <div class="panel quick-actions">
+            <h2>AÇÕES RÁPIDAS</h2>
+            <button class="quick" id="quickNewMc">🎤 CADASTRAR NOVO MC</button>
+            <button class="quick" id="quickExport">💾 EXPORTAR DADOS</button>
+            <button class="quick" id="quickImport">📥 IMPORTAR DADOS</button>
+            <input type="file" id="importFile" accept=".json" hidden>
+            <button class="quick" id="quickReset">↺ RESTAURAR DADOS DEMO</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="mcsView">
+        <div class="page-head">
+          <div><span class="eyebrow red">BANCO DE DADOS</span><h1>MCs DA ALCATÉIA</h1><p>Cadastre e edite os competidores.</p></div>
+          <button class="primary" id="newMcButton">+ NOVO MC</button>
+        </div>
+
+        <div class="toolbar">
+          <div class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="Buscar MC por nome ou Instagram..."></div>
+          <select id="sortSelect">
+            <option value="pontos">Maior pontuação</option>
+            <option value="nome">Nome A–Z</option>
+            <option value="titulos">Mais títulos</option>
+            <option value="twolalas">Mais Twolalas</option>
+            <option value="participacoes">Mais participações</option>
+          </select>
+        </div>
+
+        <div id="mcAdminList" class="mc-admin-list"></div>
+        <div id="emptyState" class="empty" hidden>
+          <div>🐺</div><h2>NENHUM MC ENCONTRADO</h2><p>Cadastre o primeiro MC ou altere sua busca.</p>
+        </div>
+      </section>
+
+      <section class="view" id="rankingView">
+        <div class="page-head"><div><span class="eyebrow blue">CLASSIFICAÇÃO</span><h1>RANKING</h1><p>Prévia do ranking calculado a partir dos cadastros.</p></div></div>
+        <div class="panel"><div id="fullRanking" class="full-ranking"></div></div>
+      </section>
+
+      <section class="view" id="batalhasView">
+        <div class="page-head"><div><span class="eyebrow red">RESULTADOS</span><h1>BATALHAS</h1><p>O registro de resultados será conectado ao ranking na próxima etapa.</p></div></div>
+        <div class="coming"><span>⚡</span><h2>REGISTRO DE BATALHAS</h2><p>Aqui vamos cadastrar fase, adversário, placar, vitória 2×0, semifinal e título. O sistema calculará os pontos automaticamente.</p></div>
+      </section>
+
+      <section class="view" id="eventosView">
+        <div class="page-head"><div><span class="eyebrow blue">AGENDA</span><h1>EVENTOS</h1><p>Gerencie a próxima batalha e os eventos futuros.</p></div></div>
+        <div class="coming"><span>📅</span><h2>GERENCIADOR DE EVENTOS</h2><p>Este módulo será ligado ao site público depois do banco de dados.</p></div>
+      </section>
+
+      <section class="view" id="curiosidadesView">
+        <div class="page-head"><div><span class="eyebrow red">DESTAQUES</span><h1>CURIOSIDADES</h1><p>Rei da Alcatéia, Rei do Twolala, Destaque do Ano e outros.</p></div></div>
+        <div class="coming"><span>⭐</span><h2>CURIOSIDADES</h2><p>Os campeões automáticos serão calculados a partir dos dados dos MCs.</p></div>
+      </section>
+
+      <section class="view" id="parceirosView">
+        <div class="page-head"><div><span class="eyebrow blue">APOIO</span><h1>PARCEIROS</h1><p>Cadastre as marcas e pessoas que fortalecem o projeto.</p></div></div>
+        <div class="coming"><span>🤝</span><h2>PARCEIROS</h2><p>O cadastro de parceiros será incluído no próximo módulo.</p></div>
+      </section>
+
+      <section class="view" id="pixView">
+        <div class="page-head"><div><span class="eyebrow red">APOIO</span><h1>CHAVE PIX</h1><p>Configure a chave exibida no site oficial.</p></div></div>
+        <div class="coming"><span>💰</span><h2>CHAVE PIX</h2><p>O editor da chave PIX será incluído junto com as configurações gerais.</p></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="mcModal" aria-hidden="true">
+    <div class="modal-box">
+      <button class="close" id="closeModal">×</button>
+      <div class="modal-head"><span class="eyebrow red" id="modalEyebrow">CADASTRO</span><h2 id="modalTitle">NOVO MC</h2></div>
+      <form id="mcForm">
+        <input type="hidden" id="mcId">
+        <div class="form-grid">
+          <label class="field wide"><span>Nome artístico *</span><input id="mcNome" required maxlength="60" placeholder="Ex.: Erick Martinss"></label>
+          <label class="field"><span>Instagram</span><input id="mcInstagram" placeholder="@usuario ou https://instagram.com/usuario"></label>
+          <label class="field"><span>Chave PIX</span><input id="mcPix" placeholder="Chave PIX do MC"></label>
+          <label class="field"><span>Participações</span><input id="mcParticipacoes" type="number" min="0" value="0"></label>
+          <label class="field"><span>Títulos</span><input id="mcTitulos" type="number" min="0" value="0"></label>
+          <label class="field"><span>Derrotas</span><input id="mcDerrotas" type="number" min="0" value="0"></label>
+          <label class="field"><span>Twolalas</span><input id="mcTwolalas" type="number" min="0" value="0"></label>
+          <label class="field"><span>Pontos</span><input id="mcPontos" type="number" min="0" value="0"></label>
+          <label class="field wide"><span>Biografia</span><textarea id="mcBio" rows="4" maxlength="1000" placeholder="Biografia oficial do MC..."></textarea></label>
+          <label class="field wide"><span>Melhor rima</span><textarea id="mcRima" rows="3" maxlength="600" placeholder="Registre aqui a melhor rima do MC..."></textarea></label>
+          <label class="field wide"><span>Foto do MC</span><input id="mcFoto" type="file" accept="image/*"><small>Na versão local, a foto fica salva no navegador. Para o banco online, enviaremos a imagem para armazenamento.</small></label>
+        </div>
+        <div class="preview-row">
+          <div class="photo-preview" id="photoPreview">FOTO<br>DO MC</div>
+          <div><strong id="previewName">NOME DO MC</strong><p id="previewMeta">0 pontos • 0 títulos • 0 Twolalas</p></div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="secondary" id="cancelForm">CANCELAR</button>
+          <button type="submit" class="primary">SALVAR MC</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="admin.js"></script>
+</body>
+</html>
